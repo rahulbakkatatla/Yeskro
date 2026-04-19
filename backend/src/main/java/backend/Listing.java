@@ -13,6 +13,10 @@ public class Listing {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
     private String title;
     private String description;
     private String category;
