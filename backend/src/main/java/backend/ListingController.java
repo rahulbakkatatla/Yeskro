@@ -1,6 +1,7 @@
 package backend;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -9,20 +10,25 @@ import java.util.List;
 public class ListingController {
 
     @Autowired
-    private ListingRepository listingRepository;
+    private ListingService listingService;
 
     @GetMapping
-    public List<Listing> getAllListings() {
-        return listingRepository.findAll();
+    public List<Listing> getAllListings(
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) String category) {
+        if (city != null) return listingService.getListingsByCity(city);
+        if (category != null) return listingService.getListingsByCategory(category);
+        return listingService.getAllListings();
     }
 
     @PostMapping
-    public Listing createListing(@RequestBody Listing listing) {
-        return listingRepository.save(listing);
+    public ResponseEntity<Listing> createListing(@RequestBody Listing listing) {
+        Listing saved = listingService.createListing(listing);
+        return ResponseEntity.ok(saved);
     }
 
-    @GetMapping("/{id}")
-    public Listing getListingById(@PathVariable Long id) {
-        return listingRepository.findById(id).orElseThrow();
+    @GetMapping("/user/{userId}")
+    public List<Listing> getListingsByUser(@PathVariable Long userId) {
+        return listingService.getListingsByUser(userId);
     }
 }

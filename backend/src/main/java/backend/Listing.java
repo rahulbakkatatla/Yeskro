@@ -26,6 +26,12 @@ public class Listing {
     private Double budgetMin;
     private Double budgetMax;
     private Boolean isActive = true;
-    private LocalDateTime createdAt = LocalDateTime.now();
-    private LocalDateTime expiresAt = LocalDateTime.now().plusDays(7);
+    private LocalDateTime createdAt;
+    private LocalDateTime expiresAt;
+
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+        this.expiresAt = LocalDateTime.now().plusDays(7);
+    }
 }
