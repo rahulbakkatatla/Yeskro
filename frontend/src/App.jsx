@@ -3,6 +3,8 @@ import axios from 'axios'
 
 const API = 'http://localhost:8080'
 
+const CATEGORIES = ['Home Services', 'Music', 'Labour', 'Tutoring', 'Driving', 'Other']
+
 function ListingCard({ listing }) {
   const initials = listing.user?.name
     ? listing.user.name.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase()
@@ -39,18 +41,139 @@ function ListingCard({ listing }) {
   )
 }
 
+function PostModal({ onClose, onSuccess }) {
+  const [form, setForm] = useState({
+    title: '', description: '', category: 'Home Services',
+    type: 'offering', area: '', city: 'Hyderabad',
+    budgetMin: '', budgetMax: ''
+  })
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  const handle = (e) => setForm({ ...form, [e.target.name]: e.target.value })
+
+  const submit = async () => {
+    if (!form.title.trim()) { setError('Title is required'); return }
+    if (!form.area.trim()) { setError('Area is required'); return }
+    try {
+      setLoading(true)
+      setError(null)
+      await axios.post(`${API}/api/listings`, {
+        ...form,
+        budgetMin: parseFloat(form.budgetMin) || 0,
+        budgetMax: parseFloat(form.budgetMax) || 0,
+        user: { id: 1 }
+      })
+      onSuccess()
+    } catch (err) {
+      setError('Failed to post listing. Try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end justify-center">
+      <div className="bg-white w-full max-w-md rounded-t-3xl p-6 max-h-screen overflow-y-auto">
+
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <div className="text-xl font-black text-gray-900">Post a listing</div>
+            <div className="text-xs text-gray-400 mt-1">Tell people what you offer or need</div>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold">✕</button>
+        </div>
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-3 mb-4 text-sm text-red-600">
+            {error}
+          </div>
+        )}
+
+        <div className="mb-4">
+          <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">I am</label>
+          <div className="flex gap-2">
+            {['offering', 'seeking'].map(t => (
+              <button key={t} onClick={() => setForm({...form, type: t})}
+                className={`flex-1 py-3 rounded-xl text-sm font-bold capitalize transition-all ${
+                  form.type === t ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500'
+                }`}>
+                {t === 'offering' ? '🙋 Offering' : '🤝 Seeking'}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="mb-4">
+          <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Title</label>
+          <input name="title" value={form.title} onChange={handle}
+            placeholder="e.g. Available for car cleaning today"
+            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 transition-colors"/>
+        </div>
+
+        <div className="mb-4">
+          <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Category</label>
+          <div className="grid grid-cols-2 gap-2">
+            {CATEGORIES.map(cat => (
+              <button key={cat} onClick={() => setForm({...form, category: cat})}
+                className={`py-2 px-3 rounded-xl text-xs font-semibold transition-all text-left ${
+                  form.category === cat
+                    ? 'bg-teal-500 text-white border-2 border-teal-500'
+                    : 'bg-gray-50 text-gray-500 border-2 border-transparent'
+                }`}>
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="mb-4">
+          <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Description</label>
+          <textarea name="description" value={form.description} onChange={handle} rows={3}
+            placeholder="Describe what you can do or what you need..."
+            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 transition-colors resize-none"/>
+        </div>
+
+        <div className="mb-4">
+          <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Your area</label>
+          <input name="area" value={form.area} onChange={handle}
+            placeholder="e.g. Banjara Hills"
+            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 transition-colors"/>
+        </div>
+
+        <div className="mb-6">
+          <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Budget (₹)</label>
+          <div className="flex gap-2">
+            <input name="budgetMin" value={form.budgetMin} onChange={handle}
+              placeholder="Min" type="number"
+              className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 transition-colors"/>
+            <input name="budgetMax" value={form.budgetMax} onChange={handle}
+              placeholder="Max" type="number"
+              className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 transition-colors"/>
+          </div>
+        </div>
+
+        <button onClick={submit} disabled={loading}
+          className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm tracking-wide hover:bg-gray-700 transition-colors disabled:opacity-50">
+          {loading ? 'Posting...' : 'Post listing →'}
+        </button>
+
+      </div>
+    </div>
+  )
+}
+
 function App() {
   const [listings, setListings] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [search, setSearch] = useState('')
   const [activecat, setActivecat] = useState('All')
+  const [showModal, setShowModal] = useState(false)
 
-  const cats = ['All', 'Home Services', 'Music', 'Labour', 'Tutoring', 'Driving']
+  const cats = ['All', ...CATEGORIES]
 
-  useEffect(() => {
-    fetchListings()
-  }, [])
+  useEffect(() => { fetchListings() }, [])
 
   const fetchListings = async () => {
     try {
@@ -65,6 +188,11 @@ function App() {
     }
   }
 
+  const handlePostSuccess = () => {
+    setShowModal(false)
+    fetchListings()
+  }
+
   const filtered = listings.filter(l => {
     const matchCat = activecat === 'All' || l.category === activecat
     const matchSearch = l.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -76,50 +204,33 @@ function App() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-md mx-auto">
 
-        {/* Header */}
         <div className="bg-white sticky top-0 z-10 border-b border-gray-100">
           <div className="flex justify-between items-center px-5 py-4">
             <div className="text-2xl font-black text-gray-900 tracking-tight">
               Wor<span className="text-teal-500">bid</span>
             </div>
-            <button
-              onClick={() => alert('Post listing — coming soon!')}
-              className="bg-gray-900 text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-gray-700 transition-colors"
-            >
+            <button onClick={() => setShowModal(true)}
+              className="bg-gray-900 text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-gray-700 transition-colors">
               + Post
             </button>
           </div>
-
-          {/* Search */}
           <div className="px-5 pb-3">
-            <input
-              type="text"
-              placeholder="Search listings..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 transition-colors"
-            />
+            <input type="text" placeholder="Search listings..."
+              value={search} onChange={e => setSearch(e.target.value)}
+              className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 transition-colors"/>
           </div>
-
-          {/* Categories */}
-          <div className="flex gap-2 px-5 pb-4 overflow-x-auto scrollbar-hide">
+          <div className="flex gap-2 px-5 pb-4 overflow-x-auto">
             {cats.map(cat => (
-              <button
-                key={cat}
-                onClick={() => setActivecat(cat)}
+              <button key={cat} onClick={() => setActivecat(cat)}
                 className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
-                  activecat === cat
-                    ? 'bg-gray-900 text-white'
-                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                }`}
-              >
+                  activecat === cat ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                }`}>
                 {cat}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Body */}
         <div className="px-5 pt-4">
           <div className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">
             {filtered.length} listings · Hyderabad
@@ -135,9 +246,7 @@ function App() {
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-center">
               <div className="text-red-600 text-sm font-semibold">{error}</div>
-              <button onClick={fetchListings} className="mt-2 text-xs text-red-400 underline">
-                Try again
-              </button>
+              <button onClick={fetchListings} className="mt-2 text-xs text-red-400 underline">Try again</button>
             </div>
           )}
 
@@ -154,6 +263,13 @@ function App() {
         </div>
 
       </div>
+
+      {showModal && (
+        <PostModal
+          onClose={() => setShowModal(false)}
+          onSuccess={handlePostSuccess}
+        />
+      )}
     </div>
   )
 }
