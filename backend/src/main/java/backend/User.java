@@ -16,6 +16,7 @@ public class User {
     @Column(unique = true, nullable = false)
     private String phone;
 
+    private String password;
     private String name;
     private String photoUrl;
     private String area;
@@ -23,4 +24,9 @@ public class User {
     private String bio;
     private Boolean isVerified = false;
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+    }
 }
