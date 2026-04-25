@@ -13,8 +13,8 @@ import java.net.URI;
 @Service
 public class OtpService {
 
-    @Value("${FAST2SMS_API_KEY}")
-    private String apiKey;
+    @Value("${MSG91_AUTH_KEY:}")
+    private String authKey;
 
     private Map<String, String> otpStore = new HashMap<>();
 
@@ -35,9 +35,8 @@ public class OtpService {
 
     public boolean sendOtp(String phone, String otp) {
         try {
-            String url = "https://www.fast2sms.com/dev/bulkV2?authorization=" + apiKey
-                + "&route=otp&variables_values=" + otp
-                + "&flash=0&numbers=" + phone;
+            String url = "https://control.msg91.com/api/v5/otp?template_id=&mobile=91" + phone
+                + "&authkey=" + authKey + "&otp=" + otp;
 
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
@@ -46,6 +45,7 @@ public class OtpService {
                 .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println("MSG91 response: " + response.body());
             return response.statusCode() == 200;
         } catch (Exception e) {
             System.out.println("SMS send failed: " + e.getMessage());
