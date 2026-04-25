@@ -4,13 +4,32 @@ import axios from 'axios'
 const API = 'https://worbid.onrender.com'
 const CATEGORIES = ['Home Services', 'Music', 'Labour', 'Tutoring', 'Driving', 'Other']
 
-function ListingCard({ listing, onProfileClick }) {
+function ListingCard({ listing, onProfileClick, currentUser }) {
+  const [requested, setRequested] = useState(false)
+  const [requesting, setRequesting] = useState(false)
+
   const initials = listing.user?.name
     ? listing.user.name.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase()
     : '??'
 
+  const isOwn = currentUser?.id === listing.user?.id
+
+  const handleRequestContact = async (e) => {
+    e.stopPropagation()
+    if (!currentUser) return
+    try {
+      setRequesting(true)
+      await axios.post(`${API}/api/listings/${listing.id}/request-contact?requesterId=${currentUser.id}`)
+      setRequested(true)
+    } catch (err) {
+      setRequested(true)
+    } finally {
+      setRequesting(false)
+    }
+  }
+
   return (
-    <div className="bg-white rounded-2xl p-4 mb-3 shadow-sm border border-gray-100 hover:border-teal-300 hover:shadow-md transition-all cursor-pointer">
+    <div className="bg-white rounded-2xl p-4 mb-3 shadow-sm border border-gray-100 hover:border-teal-300 hover:shadow-md transition-all">
       <div className="flex justify-between items-start mb-2">
         <span className="text-xs font-bold px-2 py-1 rounded-lg bg-teal-50 text-teal-700">{listing.category}</span>
         <span className="text-xs text-gray-400 capitalize">{listing.type}</span>
@@ -28,13 +47,146 @@ function ListingCard({ listing, onProfileClick }) {
             <div className="text-xs text-gray-400">{listing.area}</div>
           </div>
         </div>
-        <div className="text-sm font-bold text-gray-900">₹{listing.budgetMin}–{listing.budgetMax}</div>
+        <div className="flex items-center gap-2">
+          <div className="text-sm font-bold text-gray-900">₹{listing.budgetMin}–{listing.budgetMax}</div>
+          {!isOwn && (
+            <button
+              onClick={handleRequestContact}
+              disabled={requested || requesting}
+              className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-all ${
+                requested
+                  ? 'bg-green-50 text-green-600'
+                  : 'bg-gray-900 text-white hover:bg-gray-700'
+              }`}>
+              {requesting ? '...' : requested ? 'Sent ✓' : 'Connect'}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   )
 }
 
-function ProfilePage({ userId, currentUser, onBack }) {
+function RequestsInbox({ currentUser, onBack }) {
+  const [requests, setRequests] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [approvedNumbers, setApprovedNumbers] = useState({})
+
+  useEffect(() => {
+    const fetchRequests = async () => {
+      try {
+        const res = await axios.get(`${API}/api/users/${currentUser.id}/contact-requests`)
+        setRequests(res.data)
+      } catch (err) {
+        console.error('Failed to load requests')
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchRequests()
+  }, [currentUser.id])
+
+  const handleApprove = async (requestId, requesterPhone) => {
+    try {
+      await axios.put(`${API}/api/contact-requests/${requestId}/approve`)
+      setRequests(prev => prev.map(r => r.id === requestId ? {...r, status: 'approved'} : r))
+      setApprovedNumbers(prev => ({...prev, [requestId]: requesterPhone}))
+    } catch (err) {
+      console.error('Failed to approve')
+    }
+  }
+
+  const handleReject = async (requestId) => {
+    try {
+      await axios.put(`${API}/api/contact-requests/${requestId}/reject`)
+      setRequests(prev => prev.map(r => r.id === requestId ? {...r, status: 'rejected'} : r))
+    } catch (err) {
+      console.error('Failed to reject')
+    }
+  }
+
+  const pending = requests.filter(r => r.status === 'pending')
+  const approved = requests.filter(r => r.status === 'approved')
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-md mx-auto">
+        <div className="bg-white border-b border-gray-100 px-5 py-4 flex items-center gap-3">
+          <button onClick={onBack} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-bold text-sm">←</button>
+          <div className="font-bold text-gray-900">Contact Requests</div>
+          {pending.length > 0 && <span className="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{pending.length}</span>}
+        </div>
+
+        <div className="px-5 pt-4">
+          {loading && <div className="text-center py-16 text-gray-400 text-sm">Loading...</div>}
+
+          {!loading && requests.length === 0 && (
+            <div className="text-center py-16 text-gray-400">
+              <div className="text-3xl mb-3">📬</div>
+              <div className="text-sm">No contact requests yet</div>
+              <div className="text-xs mt-1">When someone wants to connect they'll appear here</div>
+            </div>
+          )}
+
+          {pending.length > 0 && (
+            <>
+              <div className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Pending — {pending.length}</div>
+              {pending.map(req => (
+                <div key={req.id} className="bg-white rounded-2xl p-4 mb-3 border border-orange-200 shadow-sm">
+                  <div className="flex items-start gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-xl bg-teal-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                      {req.requester?.name?.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase()}
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900 text-sm">{req.requester?.name}</div>
+                      <div className="text-xs text-gray-500">{req.requester?.area} · wants to connect</div>
+                      <div className="text-xs text-gray-400 mt-0.5">Re: {req.listing?.title}</div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={() => handleApprove(req.id, req.requester?.phone)}
+                      className="flex-1 bg-teal-500 text-white text-xs font-bold py-2 rounded-xl hover:bg-teal-600 transition-colors">
+                      ✓ Approve
+                    </button>
+                    <button onClick={() => handleReject(req.id)}
+                      className="flex-1 bg-gray-100 text-gray-600 text-xs font-bold py-2 rounded-xl hover:bg-gray-200 transition-colors">
+                      ✕ Decline
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
+
+          {approved.length > 0 && (
+            <>
+              <div className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3 mt-4">Approved — {approved.length}</div>
+              {approved.map(req => (
+                <div key={req.id} className="bg-white rounded-2xl p-4 mb-3 border border-green-200 shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-teal-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                      {req.requester?.name?.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase()}
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900 text-sm">{req.requester?.name}</div>
+                      <div className="text-xs text-gray-400 mt-0.5">Re: {req.listing?.title}</div>
+                    </div>
+                    <a href={`tel:${req.requester?.phone}`}
+                      className="bg-green-50 text-green-700 text-xs font-bold px-3 py-2 rounded-xl hover:bg-green-100 transition-colors">
+                      📞 {req.requester?.phone}
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ProfilePage({ userId, currentUser, onBack, onOpenRequests }) {
   const [user, setUser] = useState(null)
   const [listings, setListings] = useState([])
   const [loading, setLoading] = useState(true)
@@ -62,7 +214,6 @@ function ProfilePage({ userId, currentUser, onBack }) {
     : '??'
 
   const isOwnProfile = currentUser?.id === userId
-
   const joinedDate = user?.createdAt
     ? new Date(user.createdAt).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })
     : ''
@@ -76,15 +227,17 @@ function ProfilePage({ userId, currentUser, onBack }) {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-md mx-auto">
-
-        {/* Header */}
         <div className="bg-white border-b border-gray-100 px-5 py-4 flex items-center gap-3">
           <button onClick={onBack} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-bold text-sm">←</button>
           <div className="font-bold text-gray-900">Profile</div>
-          {isOwnProfile && <div className="ml-auto text-xs text-teal-600 font-semibold">Your profile</div>}
+          {isOwnProfile && (
+            <button onClick={onOpenRequests}
+              className="ml-auto text-xs font-semibold bg-orange-50 text-orange-600 px-3 py-1.5 rounded-xl hover:bg-orange-100 transition-colors">
+              📬 Requests
+            </button>
+          )}
         </div>
 
-        {/* Profile card */}
         <div className="bg-white mx-5 mt-5 rounded-2xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-start gap-4">
             <div className="w-16 h-16 rounded-2xl bg-teal-500 flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
@@ -93,21 +246,17 @@ function ProfilePage({ userId, currentUser, onBack }) {
             <div className="flex-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="font-black text-gray-900 text-lg">{user?.name}</h2>
-                {user?.isVerified && (
-                  <span className="text-xs font-bold bg-teal-50 text-teal-700 px-2 py-0.5 rounded-full">✓ Verified</span>
-                )}
+                {user?.isVerified && <span className="text-xs font-bold bg-teal-50 text-teal-700 px-2 py-0.5 rounded-full">✓ Verified</span>}
               </div>
               <div className="text-xs text-gray-500 mt-1">{user?.area}{user?.city ? `, ${user.city}` : ''}</div>
               {joinedDate && <div className="text-xs text-gray-400 mt-1">Member since {joinedDate}</div>}
             </div>
           </div>
-
           {user?.bio && (
             <div className="mt-4 pt-4 border-t border-gray-100">
               <p className="text-sm text-gray-600 leading-relaxed">{user.bio}</p>
             </div>
           )}
-
           <div className="mt-4 pt-4 border-t border-gray-100 flex gap-4">
             <div className="text-center">
               <div className="text-xl font-black text-gray-900">{listings.length}</div>
@@ -124,7 +273,6 @@ function ProfilePage({ userId, currentUser, onBack }) {
           </div>
         </div>
 
-        {/* Listings */}
         <div className="px-5 mt-5">
           <div className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">
             {listings.length > 0 ? `${listings.length} active listings` : 'No listings yet'}
@@ -141,7 +289,6 @@ function ProfilePage({ userId, currentUser, onBack }) {
             </div>
           ))}
         </div>
-
         <div className="h-8"/>
       </div>
     </div>
@@ -204,7 +351,7 @@ function PostModal({ onClose, onSuccess, currentUser }) {
         <div className="mb-4">
           <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Title</label>
           <input name="title" value={form.title} onChange={handle} placeholder="e.g. Available for car cleaning today"
-            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 transition-colors"/>
+            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
         </div>
         <div className="mb-4">
           <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Category</label>
@@ -221,12 +368,12 @@ function PostModal({ onClose, onSuccess, currentUser }) {
           <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Description</label>
           <textarea name="description" value={form.description} onChange={handle} rows={3}
             placeholder="Describe what you can do or what you need..."
-            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 transition-colors resize-none"/>
+            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 resize-none"/>
         </div>
         <div className="mb-4">
           <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Your area</label>
           <input name="area" value={form.area} onChange={handle} placeholder="e.g. Banjara Hills"
-            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 transition-colors"/>
+            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
         </div>
         <div className="mb-6">
           <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Budget (₹)</label>
@@ -304,7 +451,7 @@ function RegisterPage({ onRegister }) {
         <div className="mb-6">
           <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Bio (optional)</label>
           <textarea name="bio" value={form.bio} onChange={handle} rows={2} placeholder="Tell people what you can do..."
-            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 transition-colors resize-none"/>
+            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 resize-none"/>
         </div>
         <button onClick={submit} disabled={loading}
           className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm tracking-wide hover:bg-gray-700 transition-colors disabled:opacity-50">
@@ -325,7 +472,7 @@ function App() {
   const [showModal, setShowModal] = useState(false)
   const [currentUser, setCurrentUser] = useState(null)
   const [viewingProfile, setViewingProfile] = useState(null)
-  const [page, setPage] = useState('feed') // feed | profile | myprofile
+  const [page, setPage] = useState('feed')
 
   const cats = ['All', ...CATEGORIES]
 
@@ -377,12 +524,30 @@ function App() {
 
   if (!currentUser) return <RegisterPage onRegister={handleRegister} />
 
+  if (page === 'requests') {
+    return <RequestsInbox currentUser={currentUser} onBack={() => setPage('feed')} />
+  }
+
   if (page === 'profile' && viewingProfile) {
-    return <ProfilePage userId={viewingProfile} currentUser={currentUser} onBack={() => setPage('feed')} />
+    return (
+      <ProfilePage
+        userId={viewingProfile}
+        currentUser={currentUser}
+        onBack={() => setPage('feed')}
+        onOpenRequests={() => setPage('requests')}
+      />
+    )
   }
 
   if (page === 'myprofile') {
-    return <ProfilePage userId={currentUser.id} currentUser={currentUser} onBack={() => setPage('feed')} />
+    return (
+      <ProfilePage
+        userId={currentUser.id}
+        currentUser={currentUser}
+        onBack={() => setPage('feed')}
+        onOpenRequests={() => setPage('requests')}
+      />
+    )
   }
 
   return (
@@ -392,8 +557,7 @@ function App() {
           <div className="flex justify-between items-center px-5 py-4">
             <div className="text-2xl font-black text-gray-900 tracking-tight">Wor<span className="text-teal-500">bid</span></div>
             <div className="flex items-center gap-2">
-              <button onClick={() => setPage('myprofile')}
-                className="text-xs font-semibold text-gray-600 hover:text-teal-600 transition-colors">
+              <button onClick={() => setPage('myprofile')} className="text-xs font-semibold text-gray-600 hover:text-teal-600">
                 Hi, {currentUser.name.split(' ')[0]}
               </button>
               <button onClick={() => setShowModal(true)}
@@ -405,7 +569,7 @@ function App() {
           </div>
           <div className="px-5 pb-3">
             <input type="text" placeholder="Search listings..." value={search} onChange={e => setSearch(e.target.value)}
-              className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 transition-colors"/>
+              className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
           </div>
           <div className="flex gap-2 px-5 pb-4 overflow-x-auto">
             {cats.map(cat => (
@@ -425,7 +589,7 @@ function App() {
           {error && <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-center"><div className="text-red-600 text-sm font-semibold">{error}</div><button onClick={fetchListings} className="mt-2 text-xs text-red-400 underline">Try again</button></div>}
           {!loading && !error && filtered.length === 0 && <div className="text-center py-16 text-gray-400"><div className="text-3xl mb-3">🔍</div><div className="text-sm">No listings found</div></div>}
           {!loading && filtered.map(listing => (
-            <ListingCard key={listing.id} listing={listing} onProfileClick={handleProfileClick} />
+            <ListingCard key={listing.id} listing={listing} onProfileClick={handleProfileClick} currentUser={currentUser} />
           ))}
         </div>
       </div>
