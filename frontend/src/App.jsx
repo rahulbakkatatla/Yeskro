@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
+import SentRequests from './SentRequests'
 
 const API = 'https://worbid.onrender.com'
 const CATEGORIES = ['Home Services', 'Music', 'Labour', 'Tutoring', 'Driving', 'Other']
@@ -14,8 +15,7 @@ function ListingCard({ listing, onProfileClick, currentUser }) {
 
   const isOwn = currentUser?.id === listing.user?.id
 
-  const handleRequestContact = async (e) => {
-    e.stopPropagation()
+  const handleRequestContact = async () => {
     if (!currentUser) return
     try {
       setRequesting(true)
@@ -36,7 +36,7 @@ function ListingCard({ listing, onProfileClick, currentUser }) {
       </div>
       <h3 className="font-bold text-gray-900 mb-1 text-sm leading-tight">{listing.title}</h3>
       <p className="text-xs text-gray-500 mb-3 leading-relaxed">{listing.description}</p>
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center mb-3">
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => listing.user && onProfileClick(listing.user.id)}>
           <div className="w-7 h-7 rounded-lg bg-teal-500 flex items-center justify-center text-white text-xs font-bold">{initials}</div>
           <div>
@@ -47,22 +47,20 @@ function ListingCard({ listing, onProfileClick, currentUser }) {
             <div className="text-xs text-gray-400">{listing.area}</div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="text-sm font-bold text-gray-900">₹{listing.budgetMin}–{listing.budgetMax}</div>
-          {!isOwn && (
-            <button
-              onClick={handleRequestContact}
-              disabled={requested || requesting}
-              className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-all ${
-                requested
-                  ? 'bg-green-50 text-green-600'
-                  : 'bg-gray-900 text-white hover:bg-gray-700'
-              }`}>
-              {requesting ? '...' : requested ? 'Sent ✓' : 'Connect'}
-            </button>
-          )}
-        </div>
+        <div className="text-sm font-bold text-gray-900">₹{listing.budgetMin}–{listing.budgetMax}</div>
       </div>
+      {!isOwn && (
+        <button
+          onClick={handleRequestContact}
+          disabled={requested || requesting}
+          className={`w-full py-2.5 rounded-xl text-sm font-bold transition-all ${
+            requested
+              ? 'bg-green-50 text-green-600 border border-green-200'
+              : 'bg-gray-900 text-white hover:bg-gray-700'
+          }`}>
+          {requesting ? 'Sending...' : requested ? '✓ Request Sent' : '🤝 Connect with this person'}
+        </button>
+      )}
     </div>
   )
 }
@@ -70,7 +68,6 @@ function ListingCard({ listing, onProfileClick, currentUser }) {
 function RequestsInbox({ currentUser, onBack }) {
   const [requests, setRequests] = useState([])
   const [loading, setLoading] = useState(true)
-  const [approvedNumbers, setApprovedNumbers] = useState({})
 
   useEffect(() => {
     const fetchRequests = async () => {
@@ -86,11 +83,10 @@ function RequestsInbox({ currentUser, onBack }) {
     fetchRequests()
   }, [currentUser.id])
 
-  const handleApprove = async (requestId, requesterPhone) => {
+  const handleApprove = async (requestId) => {
     try {
       await axios.put(`${API}/api/contact-requests/${requestId}/approve`)
       setRequests(prev => prev.map(r => r.id === requestId ? {...r, status: 'approved'} : r))
-      setApprovedNumbers(prev => ({...prev, [requestId]: requesterPhone}))
     } catch (err) {
       console.error('Failed to approve')
     }
@@ -113,7 +109,7 @@ function RequestsInbox({ currentUser, onBack }) {
       <div className="max-w-md mx-auto">
         <div className="bg-white border-b border-gray-100 px-5 py-4 flex items-center gap-3">
           <button onClick={onBack} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-bold text-sm">←</button>
-          <div className="font-bold text-gray-900">Contact Requests</div>
+          <div className="font-bold text-gray-900">People wanting to connect</div>
           {pending.length > 0 && <span className="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{pending.length}</span>}
         </div>
 
@@ -123,14 +119,14 @@ function RequestsInbox({ currentUser, onBack }) {
           {!loading && requests.length === 0 && (
             <div className="text-center py-16 text-gray-400">
               <div className="text-3xl mb-3">📬</div>
-              <div className="text-sm">No contact requests yet</div>
+              <div className="text-sm">No requests yet</div>
               <div className="text-xs mt-1">When someone wants to connect they'll appear here</div>
             </div>
           )}
 
           {pending.length > 0 && (
             <>
-              <div className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Pending — {pending.length}</div>
+              <div className="text-xs font-bold uppercase tracking-widest text-orange-500 mb-3">Waiting for your response — {pending.length}</div>
               {pending.map(req => (
                 <div key={req.id} className="bg-white rounded-2xl p-4 mb-3 border border-orange-200 shadow-sm">
                   <div className="flex items-start gap-3 mb-3">
@@ -139,18 +135,18 @@ function RequestsInbox({ currentUser, onBack }) {
                     </div>
                     <div className="flex-1">
                       <div className="font-semibold text-gray-900 text-sm">{req.requester?.name}</div>
-                      <div className="text-xs text-gray-500">{req.requester?.area} · wants to connect</div>
-                      <div className="text-xs text-gray-400 mt-0.5">Re: {req.listing?.title}</div>
+                      <div className="text-xs text-gray-500">{req.requester?.area} wants to connect</div>
+                      <div className="text-xs text-gray-400 mt-0.5">About: {req.listing?.title}</div>
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <button onClick={() => handleApprove(req.id, req.requester?.phone)}
-                      className="flex-1 bg-teal-500 text-white text-xs font-bold py-2 rounded-xl hover:bg-teal-600 transition-colors">
-                      ✓ Approve
+                    <button onClick={() => handleApprove(req.id)}
+                      className="flex-1 bg-teal-500 text-white text-sm font-bold py-2.5 rounded-xl hover:bg-teal-600 transition-colors">
+                      ✓ Approve — share my number
                     </button>
                     <button onClick={() => handleReject(req.id)}
-                      className="flex-1 bg-gray-100 text-gray-600 text-xs font-bold py-2 rounded-xl hover:bg-gray-200 transition-colors">
-                      ✕ Decline
+                      className="bg-gray-100 text-gray-600 text-sm font-bold px-4 py-2.5 rounded-xl hover:bg-gray-200 transition-colors">
+                      ✕
                     </button>
                   </div>
                 </div>
@@ -160,7 +156,7 @@ function RequestsInbox({ currentUser, onBack }) {
 
           {approved.length > 0 && (
             <>
-              <div className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3 mt-4">Approved — {approved.length}</div>
+              <div className="text-xs font-bold uppercase tracking-widest text-green-600 mb-3 mt-4">Approved — {approved.length}</div>
               {approved.map(req => (
                 <div key={req.id} className="bg-white rounded-2xl p-4 mb-3 border border-green-200 shadow-sm">
                   <div className="flex items-center gap-3">
@@ -169,10 +165,10 @@ function RequestsInbox({ currentUser, onBack }) {
                     </div>
                     <div className="flex-1">
                       <div className="font-semibold text-gray-900 text-sm">{req.requester?.name}</div>
-                      <div className="text-xs text-gray-400 mt-0.5">Re: {req.listing?.title}</div>
+                      <div className="text-xs text-gray-400">About: {req.listing?.title}</div>
                     </div>
                     <a href={`tel:${req.requester?.phone}`}
-                      className="bg-green-50 text-green-700 text-xs font-bold px-3 py-2 rounded-xl hover:bg-green-100 transition-colors">
+                      className="bg-green-50 text-green-700 text-xs font-bold px-3 py-2 rounded-xl hover:bg-green-100">
                       📞 {req.requester?.phone}
                     </a>
                   </div>
@@ -186,7 +182,7 @@ function RequestsInbox({ currentUser, onBack }) {
   )
 }
 
-function ProfilePage({ userId, currentUser, onBack, onOpenRequests }) {
+function ProfilePage({ userId, currentUser, onBack, onOpenRequests, onOpenSentRequests }) {
   const [user, setUser] = useState(null)
   const [listings, setListings] = useState([])
   const [loading, setLoading] = useState(true)
@@ -231,10 +227,16 @@ function ProfilePage({ userId, currentUser, onBack, onOpenRequests }) {
           <button onClick={onBack} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-bold text-sm">←</button>
           <div className="font-bold text-gray-900">Profile</div>
           {isOwnProfile && (
-            <button onClick={onOpenRequests}
-              className="ml-auto text-xs font-semibold bg-orange-50 text-orange-600 px-3 py-1.5 rounded-xl hover:bg-orange-100 transition-colors">
-              📬 Requests
-            </button>
+            <div className="ml-auto flex gap-2">
+              <button onClick={onOpenSentRequests}
+                className="text-xs font-semibold bg-teal-50 text-teal-600 px-3 py-1.5 rounded-xl hover:bg-teal-100">
+                🤝 Sent
+              </button>
+              <button onClick={onOpenRequests}
+                className="text-xs font-semibold bg-orange-50 text-orange-600 px-3 py-1.5 rounded-xl hover:bg-orange-100">
+                📬 Inbox
+              </button>
+            </div>
           )}
         </div>
 
@@ -523,10 +525,8 @@ function App() {
   })
 
   if (!currentUser) return <RegisterPage onRegister={handleRegister} />
-
-  if (page === 'requests') {
-    return <RequestsInbox currentUser={currentUser} onBack={() => setPage('feed')} />
-  }
+  if (page === 'requests') return <RequestsInbox currentUser={currentUser} onBack={() => setPage('feed')} />
+  if (page === 'sentrequests') return <SentRequests currentUser={currentUser} onBack={() => setPage('feed')} />
 
   if (page === 'profile' && viewingProfile) {
     return (
@@ -535,6 +535,7 @@ function App() {
         currentUser={currentUser}
         onBack={() => setPage('feed')}
         onOpenRequests={() => setPage('requests')}
+        onOpenSentRequests={() => setPage('sentrequests')}
       />
     )
   }
@@ -546,6 +547,7 @@ function App() {
         currentUser={currentUser}
         onBack={() => setPage('feed')}
         onOpenRequests={() => setPage('requests')}
+        onOpenSentRequests={() => setPage('sentrequests')}
       />
     )
   }
