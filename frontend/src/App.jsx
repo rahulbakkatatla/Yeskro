@@ -6,35 +6,41 @@ const API = 'https://worbid.onrender.com'
 const CATEGORIES = ['Home Services', 'Music', 'Labour', 'Tutoring', 'Driving', 'Other']
 
 function AuthPage({ onAuth }) {
-  const [step, setStep] = useState('login') // login | register
+  const [tab, setTab] = useState('login')
   const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [keepLoggedIn, setKeepLoggedIn] = useState(true)
   const [form, setForm] = useState({ name: '', area: '', city: 'Hyderabad', bio: '' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [success, setSuccess] = useState(null)
+  const [resetStep, setResetStep] = useState('phone')
+
+  const clear = () => { setError(null); setSuccess(null) }
 
   const handleLogin = async () => {
-    if (!phone.trim() || phone.length !== 10) { setError('Enter valid 10 digit phone number'); return }
+    if (phone.length !== 10) { setError('Enter valid 10 digit phone number'); return }
     if (!password.trim()) { setError('Enter your password'); return }
     try {
-      setLoading(true); setError(null)
+      setLoading(true); clear()
       const res = await axios.post(`${API}/api/users/login`, { phone, password })
       onAuth(res.data, keepLoggedIn)
     } catch (err) {
-      if (err.response?.status === 404) setError('Phone number not registered. Create an account.')
+      if (err.response?.status === 404) setError('Phone not registered. Create an account.')
       else if (err.response?.status === 401) setError('Wrong password. Try again.')
       else setError('Something went wrong. Try again.')
     } finally { setLoading(false) }
   }
 
   const handleRegister = async () => {
-    if (!phone.trim() || phone.length !== 10) { setError('Enter valid 10 digit phone number'); return }
-    if (!password.trim() || password.length < 6) { setError('Password must be at least 6 characters'); return }
+    if (phone.length !== 10) { setError('Enter valid 10 digit phone number'); return }
+    if (password.length < 6) { setError('Password must be at least 6 characters'); return }
     if (!form.name.trim()) { setError('Name is required'); return }
     if (!form.area.trim()) { setError('Area is required'); return }
     try {
-      setLoading(true); setError(null)
+      setLoading(true); clear()
       const res = await axios.post(`${API}/api/users/register`, { ...form, phone, password })
       onAuth(res.data, keepLoggedIn)
     } catch (err) {
@@ -43,53 +49,113 @@ function AuthPage({ onAuth }) {
     } finally { setLoading(false) }
   }
 
+  const handleCheckPhoneForReset = async () => {
+    if (phone.length !== 10) { setError('Enter valid 10 digit phone number'); return }
+    try {
+      setLoading(true); clear()
+      await axios.get(`${API}/api/users/phone/${phone}`)
+      setResetStep('newpassword')
+    } catch (err) {
+      if (err.response?.status === 404) setError('Phone not registered.')
+      else setError('Something went wrong.')
+    } finally { setLoading(false) }
+  }
+
+  const handleReset = async () => {
+    if (newPassword.length < 6) { setError('Password must be at least 6 characters'); return }
+    if (newPassword !== confirmPassword) { setError('Passwords do not match'); return }
+    try {
+      setLoading(true); clear()
+      await axios.post(`${API}/api/users/reset-password`, { phone, newPassword })
+      setResetStep('done')
+      setSuccess('Password reset successfully! Login with your new password.')
+    } catch { setError('Reset failed. Try again.') }
+    finally { setLoading(false) }
+  }
+
+  const switchTab = (t) => { setTab(t); clear(); setResetStep('phone'); setPhone(''); setPassword('') }
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-5">
       <div className="bg-white rounded-3xl p-8 w-full max-w-md shadow-sm border border-gray-100">
-        <div className="text-center mb-8">
-          <div className="text-3xl font-black text-gray-900 tracking-tight mb-2">Wor<span className="text-teal-500">bid</span></div>
-          <div className="text-sm text-gray-500">{step === 'login' ? 'Welcome back' : 'Create your account'}</div>
+
+        <div className="text-center mb-6">
+          <div className="text-3xl font-black text-gray-900 tracking-tight mb-1">Wor<span className="text-teal-500">bid</span></div>
+          <div className="text-sm text-gray-500">
+            {tab === 'login' ? 'Welcome back' : tab === 'register' ? 'Create your account' : 'Reset your password'}
+          </div>
         </div>
 
         <div className="flex gap-1 bg-gray-100 rounded-xl p-1 mb-6">
-          <button onClick={() => { setStep('login'); setError(null) }}
-            className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${step === 'login' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-400'}`}>
-            Login
-          </button>
-          <button onClick={() => { setStep('register'); setError(null) }}
-            className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${step === 'register' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-400'}`}>
-            Register
-          </button>
+          {['login', 'register', 'reset'].map(t => (
+            <button key={t} onClick={() => switchTab(t)}
+              className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all capitalize ${tab === t ? 'bg-white shadow-sm text-gray-900' : 'text-gray-400'}`}>
+              {t === 'reset' ? '🔑 Reset' : t.charAt(0).toUpperCase() + t.slice(1)}
+            </button>
+          ))}
         </div>
 
         {error && <div className="bg-red-50 border border-red-200 rounded-xl p-3 mb-4 text-sm text-red-600">{error}</div>}
+        {success && <div className="bg-green-50 border border-green-200 rounded-xl p-3 mb-4 text-sm text-green-600">{success}</div>}
 
-        <div className="mb-4">
-          <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Phone number</label>
-          <input value={phone} onChange={e => { setPhone(e.target.value); setError(null) }}
-            placeholder="10 digit mobile number" type="tel" maxLength={10} autoComplete="off"
-            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 tracking-widest font-bold text-center"/>
-        </div>
-
-        <div className="mb-4">
-          <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Password</label>
-          <input value={password} onChange={e => { setPassword(e.target.value); setError(null) }}
-            placeholder={step === 'register' ? 'Min 6 characters' : 'Your password'}
-            type="password"
-            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
-        </div>
-
-        {step === 'register' && (
+        {/* LOGIN */}
+        {tab === 'login' && (
           <>
             <div className="mb-4">
+              <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Phone number</label>
+              <input value={phone} onChange={e => { setPhone(e.target.value); clear() }}
+                onKeyDown={e => e.key === 'Enter' && handleLogin()}
+                placeholder="10 digit mobile number" type="tel" maxLength={10} autoComplete="off"
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 tracking-widest font-bold text-center"/>
+            </div>
+            <div className="mb-4">
+              <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Password</label>
+              <input value={password} onChange={e => { setPassword(e.target.value); clear() }}
+                onKeyDown={e => e.key === 'Enter' && handleLogin()}
+                placeholder="Your password" type="password"
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+            </div>
+            <div className="flex items-center gap-2 mb-6">
+              <input type="checkbox" id="keep" checked={keepLoggedIn} onChange={e => setKeepLoggedIn(e.target.checked)} className="w-4 h-4 accent-teal-500"/>
+              <label htmlFor="keep" className="text-xs text-gray-500 cursor-pointer">Keep me logged in</label>
+            </div>
+            <button onClick={handleLogin} disabled={loading}
+              className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700 disabled:opacity-50">
+              {loading ? 'Logging in...' : 'Login →'}
+            </button>
+            <div className="text-center mt-3 text-xs text-gray-400">
+              Don't have an account? <button onClick={() => switchTab('register')} className="text-teal-600 font-semibold">Register</button>
+            </div>
+            <div className="text-center mt-2 text-xs text-gray-400">
+              Forgot password? <button onClick={() => switchTab('reset')} className="text-teal-600 font-semibold">Reset here</button>
+            </div>
+          </>
+        )}
+
+        {/* REGISTER */}
+        {tab === 'register' && (
+          <>
+            <div className="mb-4">
+              <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Phone number</label>
+              <input value={phone} onChange={e => { setPhone(e.target.value); clear() }}
+                placeholder="10 digit mobile number" type="tel" maxLength={10} autoComplete="off"
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 tracking-widest font-bold text-center"/>
+            </div>
+            <div className="mb-4">
+              <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Password</label>
+              <input value={password} onChange={e => { setPassword(e.target.value); clear() }}
+                placeholder="Min 6 characters" type="password"
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+            </div>
+            <div className="mb-4">
               <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Full name</label>
-              <input value={form.name} onChange={e => setForm({...form, name: e.target.value})}
+              <input value={form.name} onChange={e => { setForm({...form, name: e.target.value}); clear() }}
                 placeholder="e.g. Rahul Yadav"
                 className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
             </div>
             <div className="mb-4">
               <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Your area</label>
-              <input value={form.area} onChange={e => setForm({...form, area: e.target.value})}
+              <input value={form.area} onChange={e => { setForm({...form, area: e.target.value}); clear() }}
                 placeholder="e.g. Banjara Hills"
                 className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
             </div>
@@ -105,27 +171,81 @@ function AuthPage({ onAuth }) {
                 placeholder="Tell people what you can do..."
                 className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 resize-none"/>
             </div>
+            <div className="flex items-center gap-2 mb-6">
+              <input type="checkbox" id="keep2" checked={keepLoggedIn} onChange={e => setKeepLoggedIn(e.target.checked)} className="w-4 h-4 accent-teal-500"/>
+              <label htmlFor="keep2" className="text-xs text-gray-500 cursor-pointer">Keep me logged in</label>
+            </div>
+            <button onClick={handleRegister} disabled={loading}
+              className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700 disabled:opacity-50">
+              {loading ? 'Creating...' : 'Create account →'}
+            </button>
+            <div className="text-center mt-3 text-xs text-gray-400">
+              Already have an account? <button onClick={() => switchTab('login')} className="text-teal-600 font-semibold">Login</button>
+            </div>
           </>
         )}
 
-        <div className="flex items-center gap-2 mb-6">
-          <input type="checkbox" id="keepLoggedIn" checked={keepLoggedIn} onChange={e => setKeepLoggedIn(e.target.checked)}
-            className="w-4 h-4 accent-teal-500"/>
-          <label htmlFor="keepLoggedIn" className="text-xs text-gray-500 cursor-pointer">Keep me logged in</label>
-        </div>
+        {/* RESET PASSWORD */}
+        {tab === 'reset' && (
+          <>
+            {resetStep === 'phone' && (
+              <>
+                <div className="mb-6">
+                  <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Your registered phone number</label>
+                  <input value={phone} onChange={e => { setPhone(e.target.value); clear() }}
+                    placeholder="10 digit mobile number" type="tel" maxLength={10} autoComplete="off"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 tracking-widest font-bold text-center"/>
+                </div>
+                <button onClick={handleCheckPhoneForReset} disabled={loading}
+                  className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700 disabled:opacity-50">
+                  {loading ? 'Checking...' : 'Continue →'}
+                </button>
+              </>
+            )}
 
-        <button onClick={step === 'login' ? handleLogin : handleRegister} disabled={loading}
-          className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm tracking-wide hover:bg-gray-700 transition-colors disabled:opacity-50">
-          {loading ? '...' : step === 'login' ? 'Login →' : 'Create account →'}
-        </button>
+            {resetStep === 'newpassword' && (
+              <>
+                <div className="bg-teal-50 rounded-xl p-3 mb-4 text-xs text-teal-700 font-medium">
+                  📱 {phone} verified. Set your new password.
+                </div>
+                <div className="mb-4">
+                  <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">New password</label>
+                  <input value={newPassword} onChange={e => { setNewPassword(e.target.value); clear() }}
+                    placeholder="Min 6 characters" type="password"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+                </div>
+                <div className="mb-6">
+                  <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Confirm password</label>
+                  <input value={confirmPassword} onChange={e => { setConfirmPassword(e.target.value); clear() }}
+                    placeholder="Repeat your password" type="password"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+                </div>
+                <button onClick={handleReset} disabled={loading}
+                  className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700 disabled:opacity-50">
+                  {loading ? 'Resetting...' : 'Reset password →'}
+                </button>
+              </>
+            )}
 
-        <div className="text-center mt-4 text-xs text-gray-400">
-          {step === 'login' ? "Don't have an account? " : 'Already have an account? '}
-          <button onClick={() => { setStep(step === 'login' ? 'register' : 'login'); setError(null) }}
-            className="text-teal-600 font-semibold">
-            {step === 'login' ? 'Register' : 'Login'}
-          </button>
-        </div>
+            {resetStep === 'done' && (
+              <div className="text-center py-4">
+                <div className="text-4xl mb-4">✅</div>
+                <div className="font-bold text-gray-900 mb-2">Password reset!</div>
+                <div className="text-sm text-gray-500 mb-6">Login with your new password.</div>
+                <button onClick={() => switchTab('login')}
+                  className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700">
+                  Go to login →
+                </button>
+              </div>
+            )}
+
+            {resetStep !== 'done' && (
+              <div className="text-center mt-3 text-xs text-gray-400">
+                Remember it? <button onClick={() => switchTab('login')} className="text-teal-600 font-semibold">Back to login</button>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   )
@@ -134,11 +254,7 @@ function AuthPage({ onAuth }) {
 function ListingCard({ listing, onProfileClick, currentUser }) {
   const [requested, setRequested] = useState(false)
   const [requesting, setRequesting] = useState(false)
-
-  const initials = listing.user?.name
-    ? listing.user.name.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase()
-    : '??'
-
+  const initials = listing.user?.name ? listing.user.name.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase() : '??'
   const isOwn = currentUser?.id === listing.user?.id
 
   const handleRequestContact = async () => {
@@ -147,7 +263,7 @@ function ListingCard({ listing, onProfileClick, currentUser }) {
       setRequesting(true)
       await axios.post(`${API}/api/listings/${listing.id}/request-contact?requesterId=${currentUser.id}`)
       setRequested(true)
-    } catch (err) { setRequested(true) }
+    } catch { setRequested(true) }
     finally { setRequesting(false) }
   }
 
@@ -174,9 +290,7 @@ function ListingCard({ listing, onProfileClick, currentUser }) {
       </div>
       {!isOwn && (
         <button onClick={handleRequestContact} disabled={requested || requesting}
-          className={`w-full py-2.5 rounded-xl text-sm font-bold transition-all ${
-            requested ? 'bg-green-50 text-green-600 border border-green-200' : 'bg-gray-900 text-white hover:bg-gray-700'
-          }`}>
+          className={`w-full py-2.5 rounded-xl text-sm font-bold transition-all ${requested ? 'bg-green-50 text-green-600 border border-green-200' : 'bg-gray-900 text-white hover:bg-gray-700'}`}>
           {requesting ? 'Sending...' : requested ? '✓ Request Sent' : '🤝 Connect'}
         </button>
       )}
@@ -224,7 +338,7 @@ function RequestsInbox({ currentUser, onBack }) {
             {pending.map(req => (
               <div key={req.id} className="bg-white rounded-2xl p-4 mb-3 border border-orange-200 shadow-sm">
                 <div className="flex items-start gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-teal-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-teal-500 flex items-center justify-center text-white text-sm font-bold">
                     {req.requester?.name?.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase()}
                   </div>
                   <div className="flex-1">
@@ -235,7 +349,7 @@ function RequestsInbox({ currentUser, onBack }) {
                 </div>
                 <div className="flex gap-2">
                   <button onClick={() => handleApprove(req.id)} className="flex-1 bg-teal-500 text-white text-sm font-bold py-2.5 rounded-xl hover:bg-teal-600">✓ Approve</button>
-                  <button onClick={() => handleReject(req.id)} className="bg-gray-100 text-gray-600 text-sm font-bold px-4 py-2.5 rounded-xl hover:bg-gray-200">✕</button>
+                  <button onClick={() => handleReject(req.id)} className="bg-gray-100 text-gray-600 text-sm font-bold px-4 py-2.5 rounded-xl">✕</button>
                 </div>
               </div>
             ))}
@@ -245,7 +359,7 @@ function RequestsInbox({ currentUser, onBack }) {
             {approved.map(req => (
               <div key={req.id} className="bg-white rounded-2xl p-4 mb-3 border border-green-200 shadow-sm">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-teal-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-teal-500 flex items-center justify-center text-white text-sm font-bold">
                     {req.requester?.name?.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase()}
                   </div>
                   <div className="flex-1">
@@ -368,7 +482,10 @@ function PostModal({ onClose, onSuccess, currentUser }) {
         <div className="mb-4"><label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Description</label><textarea name="description" value={form.description} onChange={handle} rows={3} placeholder="Describe what you can do..." className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 resize-none"/></div>
         <div className="mb-4"><label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Your area</label><input name="area" value={form.area} onChange={handle} placeholder="e.g. Banjara Hills" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/></div>
         <div className="mb-6"><label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Budget (₹)</label>
-          <div className="flex gap-2"><input name="budgetMin" value={form.budgetMin} onChange={handle} placeholder="Min" type="number" className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/><input name="budgetMax" value={form.budgetMax} onChange={handle} placeholder="Max" type="number" className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/></div>
+          <div className="flex gap-2">
+            <input name="budgetMin" value={form.budgetMin} onChange={handle} placeholder="Min" type="number" className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+            <input name="budgetMax" value={form.budgetMax} onChange={handle} placeholder="Max" type="number" className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+          </div>
         </div>
         <button onClick={submit} disabled={loading} className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700 disabled:opacity-50">{loading?'Posting...':'Post listing →'}</button>
       </div>

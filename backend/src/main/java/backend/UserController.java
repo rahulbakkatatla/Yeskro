@@ -34,19 +34,30 @@ public class UserController {
     public ResponseEntity<?> login(@RequestBody Map<String, String> body) {
         String phone = body.get("phone");
         String password = body.get("password");
-
         Optional<User> userOpt = userRepository.findByPhone(phone);
         if (userOpt.isEmpty()) {
             return ResponseEntity.status(404).body("Phone not registered");
         }
-
         User user = userOpt.get();
         if (!encoder.matches(password, user.getPassword())) {
             return ResponseEntity.status(401).body("Wrong password");
         }
-
         user.setPassword(null);
         return ResponseEntity.ok(user);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> body) {
+        String phone = body.get("phone");
+        String newPassword = body.get("newPassword");
+        Optional<User> userOpt = userRepository.findByPhone(phone);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(404).body("Phone not registered");
+        }
+        User user = userOpt.get();
+        user.setPassword(encoder.encode(newPassword));
+        userRepository.save(user);
+        return ResponseEntity.ok("Password reset successfully");
     }
 
     @GetMapping("/{id}")
