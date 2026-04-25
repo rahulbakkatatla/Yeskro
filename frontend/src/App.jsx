@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 
-const API = 'http://localhost:8080'
+const API = 'https://worbid.onrender.com'
 const CATEGORIES = ['Home Services', 'Music', 'Labour', 'Tutoring', 'Driving', 'Other']
 
 function ListingCard({ listing }) {
