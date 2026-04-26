@@ -14,47 +14,7 @@ public class UserController {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private OtpService otpService;
-
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-
-    @PostMapping("/send-otp")
-    public ResponseEntity<?> sendOtp(@RequestBody Map<String, String> body) {
-        String phone = body.get("phone");
-        String purpose = body.get("purpose");
-
-        if (purpose.equals("register")) {
-            if (userRepository.findByPhone(phone).isPresent()) {
-                return ResponseEntity.badRequest().body("Phone already registered");
-            }
-        } else if (purpose.equals("reset")) {
-            if (userRepository.findByPhone(phone).isEmpty()) {
-                return ResponseEntity.status(404).body("Phone not registered");
-            }
-        }
-
-        String otp = otpService.generateOtp(phone);
-        boolean sent = otpService.sendOtp(phone, otp);
-
-        if (sent) {
-            return ResponseEntity.ok("OTP sent");
-        } else {
-            return ResponseEntity.status(500).body("Failed to send OTP");
-        }
-    }
-
-    @PostMapping("/verify-otp")
-    public ResponseEntity<?> verifyOtp(@RequestBody Map<String, String> body) {
-        String phone = body.get("phone");
-        String otp = body.get("otp");
-
-        if (otpService.verifyOtp(phone, otp)) {
-            return ResponseEntity.ok("OTP verified");
-        } else {
-            return ResponseEntity.status(400).body("Invalid or expired OTP");
-        }
-    }
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody User user) {
@@ -98,6 +58,16 @@ public class UserController {
         user.setPassword(encoder.encode(newPassword));
         userRepository.save(user);
         return ResponseEntity.ok("Password reset successfully");
+    }
+
+    @PostMapping("/send-otp")
+    public ResponseEntity<?> sendOtp(@RequestBody Map<String, String> body) {
+        return ResponseEntity.ok("OTP service coming soon");
+    }
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity<?> verifyOtp(@RequestBody Map<String, String> body) {
+        return ResponseEntity.ok("OTP verified");
     }
 
     @GetMapping("/{id}")
