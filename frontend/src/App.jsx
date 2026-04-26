@@ -385,7 +385,7 @@ function ListingCard({ listing, onProfileClick, currentUser, sentRequestsMap, se
       </button>
       )}
       {status === 'approved' && (
-      <button onClick={() => window.location.href = '?page=sentrequests'}
+      <button onClick={onOpenSentRequests}
         className="w-full py-2.5 rounded-xl text-sm font-bold bg-green-50 text-green-600 border border-green-200 hover:bg-green-100">
         📞 View Contact Number
       </button>
@@ -686,7 +686,7 @@ function App() {
           {loading && <div className="text-center py-16 text-gray-400"><div className="text-3xl mb-3">⟳</div><div className="text-sm">Loading...</div></div>}
           {error && <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-center"><div className="text-red-600 text-sm">{error}</div><button onClick={fetchListings} className="mt-2 text-xs text-red-400 underline">Try again</button></div>}
           {!loading && !error && filtered.length === 0 && <div className="text-center py-16 text-gray-400"><div className="text-3xl mb-3">🔍</div><div className="text-sm">No listings found</div></div>}
-          {!loading && filtered.map(listing => <ListingCard key={listing.id} listing={listing} onProfileClick={handleProfileClick} currentUser={currentUser} sentRequestsMap={sentRequestsMap} setSentRequestsMap={setSentRequestsMap} />)}
+          {!loading && filtered.map(listing => <ListingCard key={listing.id} listing={listing} onProfileClick={handleProfileClick} currentUser={currentUser} sentRequestsMap={sentRequestsMap} setSentRequestsMap={setSentRequestsMap} onOpenSentRequests={() => setPage('sentrequests')} />)}
         </div>
       </div>
       {showModal && <PostModal onClose={() => setShowModal(false)} onSuccess={() => { setShowModal(false); fetchListings() }} currentUser={currentUser} />}
