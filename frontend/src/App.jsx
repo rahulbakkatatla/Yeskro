@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import SentRequests from './SentRequests'
+import mixpanel from 'mixpanel-browser'
+mixpanel.init('0b2f008d747b222dee9ae44285986d80', { debug: false, track_pageview: true, api_host: 'https://api-eu.mixpanel.com' })
 import { auth } from './firebase'
 import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth'
 
@@ -41,6 +43,7 @@ function AuthPage({ onAuth }) {
       setLoading(true); clear()
       const res = await axios.post(`${API}/api/users/login`, { phone, password })
       onAuth(res.data, keepLoggedIn)
+      mixpanel.track('User Logged In', { area: res.data.area })
     } catch (err) {
       if (err.response?.status === 404) setError('Phone not registered. Create an account.')
       else if (err.response?.status === 401) setError('Wrong password. Try again.')
@@ -95,6 +98,8 @@ function AuthPage({ onAuth }) {
       if (purpose === 'register') {
         const res = await axios.post(`${API}/api/users/register`, { ...form, phone, password })
         onAuth(res.data, keepLoggedIn)
+        mixpanel.track('User Registered', { area: res.data.area, city: res.data.city })
+        mixpanel.identify(String(res.data.id))
       } else if (purpose === 'reset') {
         setStep('newpassword')
       }
@@ -337,6 +342,7 @@ function ListingCard({ listing, onProfileClick, currentUser }) {
     if (!currentUser) return
     try {
       setRequesting(true)
+      mixpanel.track('Connect Requested', { category: listing.category })
       await axios.post(`${API}/api/listings/${listing.id}/request-contact?requesterId=${currentUser.id}`)
       setRequested(true)
     } catch { setRequested(true) }
@@ -536,6 +542,7 @@ function PostModal({ onClose, onSuccess, currentUser }) {
     try {
       setLoading(true); setError(null)
       await axios.post(`${API}/api/listings`, { ...form, budgetMin: parseFloat(form.budgetMin)||0, budgetMax: parseFloat(form.budgetMax)||0, user: { id: currentUser.id } })
+      mixpanel.track('Listing Posted', { category: form.category, type: form.type })
       onSuccess()
     } catch { setError('Failed to post.') }
     finally { setLoading(false) }
