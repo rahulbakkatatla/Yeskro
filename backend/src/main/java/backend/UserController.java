@@ -16,9 +16,19 @@ public class UserController {
 
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
+    private String normalizePhone(String phone) {
+        if (phone == null) return null;
+        phone = phone.trim();
+        if (phone.startsWith("+91")) return phone.substring(3);
+        if (phone.startsWith("91") && phone.length() == 12) return phone.substring(2);
+        return phone;
+    }
+
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody User user) {
-        Optional<User> existing = userRepository.findByPhone(user.getPhone());
+        String normalized = normalizePhone(user.getPhone());
+        user.setPhone(normalized);
+        Optional<User> existing = userRepository.findByPhone(normalized);
         if (existing.isPresent()) {
             return ResponseEntity.badRequest().body("Phone already registered");
         }
@@ -32,7 +42,7 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> body) {
-        String phone = body.get("phone");
+        String phone = normalizePhone(body.get("phone"));
         String password = body.get("password");
         Optional<User> userOpt = userRepository.findByPhone(phone);
         if (userOpt.isEmpty()) {
@@ -48,7 +58,7 @@ public class UserController {
 
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> body) {
-        String phone = body.get("phone");
+        String phone = normalizePhone(body.get("phone"));
         String newPassword = body.get("newPassword");
         Optional<User> userOpt = userRepository.findByPhone(phone);
         if (userOpt.isEmpty()) {
@@ -79,7 +89,8 @@ public class UserController {
 
     @GetMapping("/phone/{phone}")
     public ResponseEntity<User> getUserByPhone(@PathVariable String phone) {
-        return userRepository.findByPhone(phone)
+        String normalized = normalizePhone(phone);
+        return userRepository.findByPhone(normalized)
                 .map(u -> { u.setPassword(null); return ResponseEntity.ok(u); })
                 .orElse(ResponseEntity.notFound().build());
     }
