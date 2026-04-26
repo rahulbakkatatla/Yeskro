@@ -210,7 +210,7 @@ function AuthPage({ onAuth }) {
                 '--PhoneInputCountryFlag-height': '1em',
                 '--PhoneInput-color--focus': '#14b8a6'
                 }}
-                className="flex w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 gap-2"/>
+        className="flex w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 gap-2"/>
             </div>
             <div className="mb-4">
               <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Password</label>
@@ -367,6 +367,12 @@ function ListingCard({ listing, onProfileClick, currentUser, sentRequestsMap, se
     await axios.post(`${API}/api/listings/${listing.id}/request-contact?requesterId=${currentUser.id}`)
     setSentRequestsMap(prev => ({...prev, [listing.id]: 'pending'}))
     mixpanel.track('Connect Requested', { category: listing.category })
+    const posterPhone = listing.user?.phone
+    if (posterPhone) {
+      const phone = posterPhone.replace(/\D/g, '')
+      const message = encodeURIComponent(`Hi! I saw your listing "${listing.title}" on Worbid and sent a connect request. Please approve it at worbid.vercel.app 🙏`)
+      window.open(`https://wa.me/91${phone}?text=${message}`, '_blank')
+    }
   } catch { setSentRequestsMap(prev => ({...prev, [listing.id]: 'pending'})) }
   finally { setRequesting(false) }
 }
