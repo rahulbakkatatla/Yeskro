@@ -332,22 +332,22 @@ function AuthPage({ onAuth }) {
   )
 }
 
-function ListingCard({ listing, onProfileClick, currentUser }) {
-  const [requested, setRequested] = useState(false)
+function ListingCard({ listing, onProfileClick, currentUser, sentRequestsMap, setSentRequestsMap, onOpenSentRequests }) {
   const [requesting, setRequesting] = useState(false)
+  const status = sentRequestsMap?.[listing.id]
   const initials = listing.user?.name ? listing.user.name.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase() : '??'
   const isOwn = currentUser?.id === listing.user?.id
 
   const handleRequestContact = async () => {
-    if (!currentUser) return
-    try {
-      setRequesting(true)
-      mixpanel.track('Connect Requested', { category: listing.category })
-      await axios.post(`${API}/api/listings/${listing.id}/request-contact?requesterId=${currentUser.id}`)
-      setRequested(true)
-    } catch { setRequested(true) }
-    finally { setRequesting(false) }
-  }
+  if (!currentUser) return
+  try {
+    setRequesting(true)
+    await axios.post(`${API}/api/listings/${listing.id}/request-contact?requesterId=${currentUser.id}`)
+    setSentRequestsMap(prev => ({...prev, [listing.id]: 'pending'}))
+    mixpanel.track('Connect Requested', { category: listing.category })
+  } catch { setSentRequestsMap(prev => ({...prev, [listing.id]: 'pending'})) }
+  finally { setRequesting(false) }
+}
 
   return (
     <div className="bg-white rounded-2xl p-4 mb-3 shadow-sm border border-gray-100 hover:border-teal-300 hover:shadow-md transition-all">
@@ -371,11 +371,33 @@ function ListingCard({ listing, onProfileClick, currentUser }) {
         <div className="text-sm font-bold text-gray-900">₹{listing.budgetMin}–{listing.budgetMax}</div>
       </div>
       {!isOwn && (
-        <button onClick={handleRequestContact} disabled={requested || requesting}
-          className={`w-full py-2.5 rounded-xl text-sm font-bold transition-all ${requested ? 'bg-green-50 text-green-600 border border-green-200' : 'bg-gray-900 text-white hover:bg-gray-700'}`}>
-          {requesting ? 'Sending...' : requested ? '✓ Request Sent' : '🤝 Connect'}
-        </button>
+        <>
+          {!status && (
+            <button onClick={handleRequestContact} disabled={requesting}
+            className="w-full py-2.5 rounded-xl text-sm font-bold bg-gray-900 text-white hover:bg-gray-700 transition-all">
+        {requesting ? 'Sending...' : '🤝 Connect'}
+      </button>
+       )}
+      {status === 'pending' && (
+        <button disabled
+        className="w-full py-2.5 rounded-xl text-sm font-bold bg-orange-50 text-orange-500 border border-orange-200 cursor-not-allowed">
+        ⏳ Request Pending
+      </button>
       )}
+      {status === 'approved' && (
+      <button onClick={() => window.location.href = '?page=sentrequests'}
+        className="w-full py-2.5 rounded-xl text-sm font-bold bg-green-50 text-green-600 border border-green-200 hover:bg-green-100">
+        📞 View Contact Number
+      </button>
+     )}
+      {status === 'rejected' && (
+      <button disabled
+        className="w-full py-2.5 rounded-xl text-sm font-bold bg-gray-50 text-gray-400 border border-gray-200 cursor-not-allowed">
+        Request Declined
+      </button>
+     )}
+    </>
+   )}
     </div>
   )
 }
@@ -586,11 +608,16 @@ function App() {
   const [currentUser, setCurrentUser] = useState(null)
   const [viewingProfile, setViewingProfile] = useState(null)
   const [page, setPage] = useState('feed')
+  const [sentRequestsMap, setSentRequestsMap] = useState({})
 
   useEffect(() => {
     const saved = localStorage.getItem('worbid_user')
-    if (saved) setCurrentUser(JSON.parse(saved))
-    fetchListings()
+    if (saved) {
+      const user = JSON.parse(saved)
+      setCurrentUser(user)
+      fetchSentRequests(user.id)
+  }
+  fetchListings()
   }, [])
 
   const fetchListings = async () => {
@@ -603,9 +630,21 @@ function App() {
     finally { setLoading(false) }
   }
 
+  const fetchSentRequests = async (userId) => {
+  try {
+    const res = await axios.get(`${API}/api/users/${userId}/my-requests`)
+    const map = {}
+    res.data.forEach(req => {
+      map[req.listing?.id] = req.status
+    })
+    setSentRequestsMap(map)
+    } catch { }
+  }
+
   const handleAuth = (user, keepLoggedIn) => {
-    setCurrentUser(user)
-    if (keepLoggedIn) localStorage.setItem('worbid_user', JSON.stringify(user))
+  setCurrentUser(user)
+  if (keepLoggedIn) localStorage.setItem('worbid_user', JSON.stringify(user))
+  fetchSentRequests(user.id)
   }
 
   const handleLogout = () => {
@@ -647,7 +686,7 @@ function App() {
           {loading && <div className="text-center py-16 text-gray-400"><div className="text-3xl mb-3">⟳</div><div className="text-sm">Loading...</div></div>}
           {error && <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-center"><div className="text-red-600 text-sm">{error}</div><button onClick={fetchListings} className="mt-2 text-xs text-red-400 underline">Try again</button></div>}
           {!loading && !error && filtered.length === 0 && <div className="text-center py-16 text-gray-400"><div className="text-3xl mb-3">🔍</div><div className="text-sm">No listings found</div></div>}
-          {!loading && filtered.map(listing => <ListingCard key={listing.id} listing={listing} onProfileClick={handleProfileClick} currentUser={currentUser} />)}
+          {!loading && filtered.map(listing => <ListingCard key={listing.id} listing={listing} onProfileClick={handleProfileClick} currentUser={currentUser} sentRequestsMap={sentRequestsMap} setSentRequestsMap={setSentRequestsMap} />)}
         </div>
       </div>
       {showModal && <PostModal onClose={() => setShowModal(false)} onSuccess={() => { setShowModal(false); fetchListings() }} currentUser={currentUser} />}
