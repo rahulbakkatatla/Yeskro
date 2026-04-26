@@ -3,6 +3,8 @@ import axios from 'axios'
 import SentRequests from './SentRequests'
 import mixpanel from 'mixpanel-browser'
 mixpanel.init('0b2f008d747b222dee9ae44285986d80', { debug: false, track_pageview: true, api_host: 'https://api-eu.mixpanel.com' })
+import PhoneInput from 'react-phone-number-input'
+import 'react-phone-number-input/style.css'
 import { auth } from './firebase'
 import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth'
 
@@ -37,7 +39,7 @@ function AuthPage({ onAuth }) {
   }
 
   const handleLogin = async () => {
-    if (phone.length !== 10) { setError('Enter valid 10 digit phone number'); return }
+    if (!phone || phone.length < 8) { setError('Enter valid 10 digit phone number'); return }
     if (!password.trim()) { setError('Enter your password'); return }
     try {
       setLoading(true); clear()
@@ -52,7 +54,7 @@ function AuthPage({ onAuth }) {
   }
 
   const handleSendOtp = async (purpose) => {
-    if (phone.length !== 10) { setError('Enter valid 10 digit phone number'); return }
+    if (!phone || phone.length < 8) { setError('Enter valid 10 digit phone number'); return }
     if (purpose === 'register') {
       if (password.length < 6) { setError('Password must be at least 6 characters'); return }
       if (!form.name.trim()) { setError('Name is required'); return }
@@ -76,7 +78,7 @@ function AuthPage({ onAuth }) {
     try {
       setLoading(true); clear()
       const verifier = setupRecaptcha()
-      const result = await signInWithPhoneNumber(auth, '+91' + phone, verifier)
+      const result = await signInWithPhoneNumber(auth, phone, verifier)
       setConfirmationResult(result)
       setStep('otp')
       setSuccess('OTP sent to +91' + phone)
@@ -159,10 +161,12 @@ function AuthPage({ onAuth }) {
           <>
             <div className="mb-4">
               <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Phone number</label>
-              <input value={phone} onChange={e => { setPhone(e.target.value); clear() }}
-                onKeyDown={e => e.key === 'Enter' && handleLogin()}
-                placeholder="10 digit mobile number" type="tel" maxLength={10} autoComplete="off"
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 tracking-widest font-bold text-center"/>
+              <PhoneInput
+                international
+                defaultCountry="IN"
+                value={phone}
+                onChange={(value) => { setPhone(value || ''); clear() }}
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
             </div>
             <div className="mb-4">
               <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Password</label>
@@ -193,9 +197,12 @@ function AuthPage({ onAuth }) {
           <>
             <div className="mb-4">
               <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Phone number</label>
-              <input value={phone} onChange={e => { setPhone(e.target.value); clear() }}
-                placeholder="10 digit mobile number" type="tel" maxLength={10} autoComplete="off"
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 tracking-widest font-bold text-center"/>
+              <PhoneInput
+                international
+                defaultCountry="IN"
+                value={phone}
+                onChange={(value) => { setPhone(value || ''); clear() }}
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
             </div>
             <div className="mb-4">
               <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Password</label>
@@ -263,9 +270,12 @@ function AuthPage({ onAuth }) {
           <>
             <div className="mb-6">
               <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Your registered phone number</label>
-              <input value={phone} onChange={e => { setPhone(e.target.value); clear() }}
-                placeholder="10 digit mobile number" type="tel" maxLength={10} autoComplete="off"
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 tracking-widest font-bold text-center"/>
+              <PhoneInput
+                international
+                defaultCountry="IN"
+                value={phone}
+                onChange={(value) => { setPhone(value || ''); clear() }}
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
             </div>
             <button onClick={() => handleSendOtp('reset')} disabled={loading}
               className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700 disabled:opacity-50">
