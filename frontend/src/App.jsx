@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import SentRequests from './SentRequests'
+import { auth } from './firebase'
+import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth'
 
 const API = 'https://worbid.onrender.com'
 const CATEGORIES = ['Home Services', 'Music', 'Labour', 'Tutoring', 'Driving', 'Other']
@@ -9,6 +11,7 @@ function AuthPage({ onAuth }) {
   const [tab, setTab] = useState('login')
   const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
+  const [otp, setOtp] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [keepLoggedIn, setKeepLoggedIn] = useState(true)
@@ -16,9 +19,20 @@ function AuthPage({ onAuth }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(null)
-  const [resetStep, setResetStep] = useState('phone')
+  const [step, setStep] = useState('form')
+  const [confirmationResult, setConfirmationResult] = useState(null)
 
   const clear = () => { setError(null); setSuccess(null) }
+
+  const setupRecaptcha = () => {
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        size: 'invisible',
+        callback: () => {}
+      })
+    }
+    return window.recaptchaVerifier
+  }
 
   const handleLogin = async () => {
     if (phone.length !== 10) { setError('Enter valid 10 digit phone number'); return }
@@ -34,30 +48,58 @@ function AuthPage({ onAuth }) {
     } finally { setLoading(false) }
   }
 
-  const handleRegister = async () => {
+  const handleSendOtp = async (purpose) => {
     if (phone.length !== 10) { setError('Enter valid 10 digit phone number'); return }
-    if (password.length < 6) { setError('Password must be at least 6 characters'); return }
-    if (!form.name.trim()) { setError('Name is required'); return }
-    if (!form.area.trim()) { setError('Area is required'); return }
+    if (purpose === 'register') {
+      if (password.length < 6) { setError('Password must be at least 6 characters'); return }
+      if (!form.name.trim()) { setError('Name is required'); return }
+      if (!form.area.trim()) { setError('Area is required'); return }
+      try {
+        await axios.get(`${API}/api/users/phone/${phone}`)
+        setError('Phone already registered. Login instead.')
+        return
+      } catch (err) {
+        if (err.response?.status !== 404) { setError('Something went wrong.'); return }
+      }
+    }
+    if (purpose === 'reset') {
+      try {
+        await axios.get(`${API}/api/users/phone/${phone}`)
+      } catch (err) {
+        setError('Phone not registered.')
+        return
+      }
+    }
     try {
       setLoading(true); clear()
-      const res = await axios.post(`${API}/api/users/register`, { ...form, phone, password })
-      onAuth(res.data, keepLoggedIn)
+      const verifier = setupRecaptcha()
+      const result = await signInWithPhoneNumber(auth, '+91' + phone, verifier)
+      setConfirmationResult(result)
+      setStep('otp')
+      setSuccess('OTP sent to +91' + phone)
     } catch (err) {
-      if (err.response?.status === 400) setError('Phone already registered. Login instead.')
-      else setError('Registration failed. Try again.')
+      console.error(err)
+      setError('Failed to send OTP. Try again.')
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear()
+        window.recaptchaVerifier = null
+      }
     } finally { setLoading(false) }
   }
 
-  const handleCheckPhoneForReset = async () => {
-    if (phone.length !== 10) { setError('Enter valid 10 digit phone number'); return }
+  const handleVerifyOtp = async (purpose) => {
+    if (otp.length !== 6) { setError('Enter 6 digit OTP'); return }
     try {
       setLoading(true); clear()
-      await axios.get(`${API}/api/users/phone/${phone}`)
-      setResetStep('newpassword')
+      await confirmationResult.confirm(otp)
+      if (purpose === 'register') {
+        const res = await axios.post(`${API}/api/users/register`, { ...form, phone, password })
+        onAuth(res.data, keepLoggedIn)
+      } else if (purpose === 'reset') {
+        setStep('newpassword')
+      }
     } catch (err) {
-      if (err.response?.status === 404) setError('Phone not registered.')
-      else setError('Something went wrong.')
+      setError('Invalid OTP. Try again.')
     } finally { setLoading(false) }
   }
 
@@ -67,24 +109,33 @@ function AuthPage({ onAuth }) {
     try {
       setLoading(true); clear()
       await axios.post(`${API}/api/users/reset-password`, { phone, newPassword })
-      setResetStep('done')
-      setSuccess('Password reset successfully! Login with your new password.')
+      setStep('done')
+      setSuccess('Password reset successfully!')
     } catch { setError('Reset failed. Try again.') }
     finally { setLoading(false) }
   }
 
-  const switchTab = (t) => { setTab(t); clear(); setResetStep('phone'); setPhone(''); setPassword('') }
+  const switchTab = (t) => {
+    setTab(t); clear(); setStep('form')
+    setPhone(''); setPassword(''); setOtp('')
+    setConfirmationResult(null)
+    if (window.recaptchaVerifier) {
+      window.recaptchaVerifier.clear()
+      window.recaptchaVerifier = null
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-5">
       <div className="bg-white rounded-3xl p-8 w-full max-w-md shadow-sm border border-gray-100">
-
         <div className="text-center mb-6">
           <div className="text-3xl font-black text-gray-900 tracking-tight mb-1">Wor<span className="text-teal-500">bid</span></div>
           <div className="text-sm text-gray-500">
             {tab === 'login' ? 'Welcome back' : tab === 'register' ? 'Create your account' : 'Reset your password'}
           </div>
         </div>
+
+        <div id="recaptcha-container"></div>
 
         <div className="flex gap-1 bg-gray-100 rounded-xl p-1 mb-6">
           {['login', 'register', 'reset'].map(t => (
@@ -133,7 +184,7 @@ function AuthPage({ onAuth }) {
         )}
 
         {/* REGISTER */}
-        {tab === 'register' && (
+        {tab === 'register' && step === 'form' && (
           <>
             <div className="mb-4">
               <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Phone number</label>
@@ -175,9 +226,9 @@ function AuthPage({ onAuth }) {
               <input type="checkbox" id="keep2" checked={keepLoggedIn} onChange={e => setKeepLoggedIn(e.target.checked)} className="w-4 h-4 accent-teal-500"/>
               <label htmlFor="keep2" className="text-xs text-gray-500 cursor-pointer">Keep me logged in</label>
             </div>
-            <button onClick={handleRegister} disabled={loading}
+            <button onClick={() => handleSendOtp('register')} disabled={loading}
               className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700 disabled:opacity-50">
-              {loading ? 'Creating...' : 'Create account →'}
+              {loading ? 'Sending OTP...' : 'Send OTP →'}
             </button>
             <div className="text-center mt-3 text-xs text-gray-400">
               Already have an account? <button onClick={() => switchTab('login')} className="text-teal-600 font-semibold">Login</button>
@@ -185,66 +236,91 @@ function AuthPage({ onAuth }) {
           </>
         )}
 
-        {/* RESET PASSWORD */}
-        {tab === 'reset' && (
+        {tab === 'register' && step === 'otp' && (
           <>
-            {resetStep === 'phone' && (
-              <>
-                <div className="mb-6">
-                  <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Your registered phone number</label>
-                  <input value={phone} onChange={e => { setPhone(e.target.value); clear() }}
-                    placeholder="10 digit mobile number" type="tel" maxLength={10} autoComplete="off"
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 tracking-widest font-bold text-center"/>
-                </div>
-                <button onClick={handleCheckPhoneForReset} disabled={loading}
-                  className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700 disabled:opacity-50">
-                  {loading ? 'Checking...' : 'Continue →'}
-                </button>
-              </>
-            )}
-
-            {resetStep === 'newpassword' && (
-              <>
-                <div className="bg-teal-50 rounded-xl p-3 mb-4 text-xs text-teal-700 font-medium">
-                  📱 {phone} verified. Set your new password.
-                </div>
-                <div className="mb-4">
-                  <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">New password</label>
-                  <input value={newPassword} onChange={e => { setNewPassword(e.target.value); clear() }}
-                    placeholder="Min 6 characters" type="password"
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
-                </div>
-                <div className="mb-6">
-                  <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Confirm password</label>
-                  <input value={confirmPassword} onChange={e => { setConfirmPassword(e.target.value); clear() }}
-                    placeholder="Repeat your password" type="password"
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
-                </div>
-                <button onClick={handleReset} disabled={loading}
-                  className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700 disabled:opacity-50">
-                  {loading ? 'Resetting...' : 'Reset password →'}
-                </button>
-              </>
-            )}
-
-            {resetStep === 'done' && (
-              <div className="text-center py-4">
-                <div className="text-4xl mb-4">✅</div>
-                <div className="font-bold text-gray-900 mb-2">Password reset!</div>
-                <div className="text-sm text-gray-500 mb-6">Login with your new password.</div>
-                <button onClick={() => switchTab('login')}
-                  className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700">
-                  Go to login →
-                </button>
-              </div>
-            )}
-
-            {resetStep !== 'done' && (
-              <div className="text-center mt-3 text-xs text-gray-400">
-                Remember it? <button onClick={() => switchTab('login')} className="text-teal-600 font-semibold">Back to login</button>
-              </div>
-            )}
+            <div className="mb-6">
+              <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Enter OTP sent to +91{phone}</label>
+              <input value={otp} onChange={e => { setOtp(e.target.value); clear() }}
+                placeholder="6 digit OTP" type="tel" maxLength={6} autoComplete="off"
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 tracking-widest font-bold text-center text-lg"/>
+            </div>
+            <button onClick={() => handleVerifyOtp('register')} disabled={loading}
+              className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700 disabled:opacity-50">
+              {loading ? 'Verifying...' : 'Verify & Create Account →'}
+            </button>
+            <button onClick={() => handleSendOtp('register')} className="w-full mt-3 py-2 text-xs text-teal-600">Resend OTP</button>
+            <button onClick={() => { setStep('form'); clear() }} className="w-full mt-1 py-2 text-xs text-gray-400">← Change details</button>
           </>
+        )}
+
+        {/* RESET */}
+        {tab === 'reset' && step === 'form' && (
+          <>
+            <div className="mb-6">
+              <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Your registered phone number</label>
+              <input value={phone} onChange={e => { setPhone(e.target.value); clear() }}
+                placeholder="10 digit mobile number" type="tel" maxLength={10} autoComplete="off"
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 tracking-widest font-bold text-center"/>
+            </div>
+            <button onClick={() => handleSendOtp('reset')} disabled={loading}
+              className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700 disabled:opacity-50">
+              {loading ? 'Sending OTP...' : 'Send OTP →'}
+            </button>
+            <div className="text-center mt-3 text-xs text-gray-400">
+              Remember it? <button onClick={() => switchTab('login')} className="text-teal-600 font-semibold">Back to login</button>
+            </div>
+          </>
+        )}
+
+        {tab === 'reset' && step === 'otp' && (
+          <>
+            <div className="mb-6">
+              <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Enter OTP sent to +91{phone}</label>
+              <input value={otp} onChange={e => { setOtp(e.target.value); clear() }}
+                placeholder="6 digit OTP" type="tel" maxLength={6} autoComplete="off"
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 tracking-widest font-bold text-center text-lg"/>
+            </div>
+            <button onClick={() => handleVerifyOtp('reset')} disabled={loading}
+              className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700 disabled:opacity-50">
+              {loading ? 'Verifying...' : 'Verify OTP →'}
+            </button>
+            <button onClick={() => handleSendOtp('reset')} className="w-full mt-3 py-2 text-xs text-teal-600">Resend OTP</button>
+            <button onClick={() => { setStep('form'); clear() }} className="w-full mt-1 py-2 text-xs text-gray-400">← Change number</button>
+          </>
+        )}
+
+        {tab === 'reset' && step === 'newpassword' && (
+          <>
+            <div className="bg-teal-50 rounded-xl p-3 mb-4 text-xs text-teal-700 font-medium">✓ OTP verified. Set your new password.</div>
+            <div className="mb-4">
+              <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">New password</label>
+              <input value={newPassword} onChange={e => { setNewPassword(e.target.value); clear() }}
+                placeholder="Min 6 characters" type="password"
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+            </div>
+            <div className="mb-6">
+              <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Confirm password</label>
+              <input value={confirmPassword} onChange={e => { setConfirmPassword(e.target.value); clear() }}
+                placeholder="Repeat your password" type="password"
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+            </div>
+            <button onClick={handleReset} disabled={loading}
+              className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700 disabled:opacity-50">
+              {loading ? 'Resetting...' : 'Reset password →'}
+            </button>
+          </>
+        )}
+
+        {tab === 'reset' && step === 'done' && (
+          <div className="text-center py-4">
+            <div className="text-4xl mb-4">✅</div>
+            <div className="font-bold text-gray-900 mb-2">Password reset!</div>
+            <div className="text-sm text-gray-500 mb-6">Login with your new password.</div>
+            <button onClick={() => switchTab('login')}
+              className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700">
+              Go to login →
+            </button>
+          </div>
         )}
       </div>
     </div>
