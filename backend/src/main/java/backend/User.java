@@ -24,6 +24,7 @@ public class User {
     private String bio;
     private Boolean isVerified = false;
     private LocalDateTime createdAt = LocalDateTime.now();
+    private String email;
 
     @PrePersist
     public void prePersist() {

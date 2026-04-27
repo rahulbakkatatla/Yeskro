@@ -249,6 +249,13 @@ function AuthPage({ onAuth }) {
                 placeholder="Tell people what you can do..."
                 className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 resize-none"/>
             </div>
+            <div className="mb-4">
+              <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Email (for notifications)</label>
+              <input value={form.email || ''} onChange={e => setForm({...form, email: e.target.value})}
+              placeholder="your@email.com (optional)"
+              type="email"
+              className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+            </div>
             <div className="flex items-center gap-2 mb-6">
               <input type="checkbox" id="keep2" checked={keepLoggedIn} onChange={e => setKeepLoggedIn(e.target.checked)} className="w-4 h-4 accent-teal-500"/>
               <label htmlFor="keep2" className="text-xs text-gray-500 cursor-pointer">Keep me logged in</label>

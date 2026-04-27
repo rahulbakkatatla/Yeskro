@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
@@ -18,54 +19,84 @@ public class ContactRequestController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private EmailService emailService;
+
     @PostMapping("/listings/{listingId}/request-contact")
-    public ResponseEntity<?> requestContact(
-            @PathVariable Long listingId,
-            @RequestParam Long requesterId) {
-
+    public ResponseEntity<?> requestContact(@PathVariable Long listingId, @RequestParam Long requesterId) {
         if (contactRequestRepository.existsByRequesterIdAndListingId(requesterId, listingId)) {
-            return ResponseEntity.badRequest().body("Request already sent");
+            return ResponseEntity.badRequest().body("Already requested");
+        }
+        Optional<Listing> listingOpt = listingRepository.findById(listingId);
+        Optional<User> requesterOpt = userRepository.findById(requesterId);
+        if (listingOpt.isEmpty() || requesterOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        Listing listing = listingOpt.get();
+        User requester = requesterOpt.get();
+        User poster = listing.getUser();
+
+        ContactRequest req = new ContactRequest();
+        req.setListing(listing);
+        req.setRequester(requester);
+        req.setStatus("pending");
+        contactRequestRepository.save(req);
+
+        // Send email to poster
+        if (poster.getEmail() != null && !poster.getEmail().isEmpty()) {
+            emailService.sendConnectRequestNotification(
+                poster.getEmail(),
+                poster.getName(),
+                listing.getTitle(),
+                requester.getName(),
+                requester.getArea()
+            );
         }
 
-        Listing listing = listingRepository.findById(listingId).orElseThrow();
-        User requester = userRepository.findById(requesterId).orElseThrow();
-
-        if (listing.getUser() != null && listing.getUser().getId().equals(requesterId)) {
-            return ResponseEntity.badRequest().body("Cannot request your own listing");
-        }
-
-        ContactRequest request = new ContactRequest();
-        request.setListing(listing);
-        request.setRequester(requester);
-        request.setStatus("pending");
-
-        contactRequestRepository.save(request);
-        return ResponseEntity.ok("Request sent");
+        return ResponseEntity.ok(req);
     }
 
     @GetMapping("/users/{userId}/contact-requests")
-    public List<ContactRequest> getRequestsForUser(@PathVariable Long userId) {
-        return contactRequestRepository.findByListingUserId(userId);
+    public ResponseEntity<List<ContactRequest>> getRequestsForUser(@PathVariable Long userId) {
+        return ResponseEntity.ok(contactRequestRepository.findByListingUserId(userId));
     }
 
     @GetMapping("/users/{userId}/my-requests")
-    public List<ContactRequest> getMyRequests(@PathVariable Long userId) {
-        return contactRequestRepository.findByRequesterId(userId);
+    public ResponseEntity<List<ContactRequest>> getMyRequests(@PathVariable Long userId) {
+        return ResponseEntity.ok(contactRequestRepository.findByRequesterId(userId));
     }
 
     @PutMapping("/contact-requests/{id}/approve")
-    public ResponseEntity<?> approveRequest(@PathVariable Long id) {
-        ContactRequest request = contactRequestRepository.findById(id).orElseThrow();
-        request.setStatus("approved");
-        contactRequestRepository.save(request);
-        return ResponseEntity.ok(request);
+    public ResponseEntity<?> approve(@PathVariable Long id) {
+        Optional<ContactRequest> reqOpt = contactRequestRepository.findById(id);
+        if (reqOpt.isEmpty()) return ResponseEntity.notFound().build();
+        ContactRequest req = reqOpt.get();
+        req.setStatus("approved");
+        contactRequestRepository.save(req);
+
+        // Send email to requester
+        User requester = req.getRequester();
+        User poster = req.getListing().getUser();
+        if (requester.getEmail() != null && !requester.getEmail().isEmpty()) {
+            emailService.sendRequestApprovedNotification(
+                requester.getEmail(),
+                requester.getName(),
+                req.getListing().getTitle(),
+                poster.getName(),
+                poster.getPhone()
+            );
+        }
+
+        return ResponseEntity.ok(req);
     }
 
     @PutMapping("/contact-requests/{id}/reject")
-    public ResponseEntity<?> rejectRequest(@PathVariable Long id) {
-        ContactRequest request = contactRequestRepository.findById(id).orElseThrow();
-        request.setStatus("rejected");
-        contactRequestRepository.save(request);
-        return ResponseEntity.ok("Rejected");
+    public ResponseEntity<?> reject(@PathVariable Long id) {
+        Optional<ContactRequest> reqOpt = contactRequestRepository.findById(id);
+        if (reqOpt.isEmpty()) return ResponseEntity.notFound().build();
+        ContactRequest req = reqOpt.get();
+        req.setStatus("rejected");
+        contactRequestRepository.save(req);
+        return ResponseEntity.ok(req);
     }
 }
