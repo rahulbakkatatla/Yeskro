@@ -541,11 +541,70 @@ function RequestsInbox({ currentUser, onBack }) {
     </div>
   )
 }
+function EditListingModal({ listing, onClose, onSave }) {
+  const [form, setForm] = useState({
+    title: listing.title || '',
+    description: listing.description || '',
+    category: listing.category || 'Other',
+    type: listing.type || 'offering',
+    area: listing.area || '',
+    city: listing.city || '',
+    budgetMin: listing.budgetMin || '',
+    budgetMax: listing.budgetMax || ''
+  })
+  const [loading, setLoading] = useState(false)
+  const handle = (e) => setForm({...form, [e.target.name]: e.target.value})
+
+  const save = async () => {
+    try {
+      setLoading(true)
+      const res = await axios.put(`${API}/api/listings/${listing.id}`, {
+        ...form,
+        budgetMin: parseFloat(form.budgetMin) || 0,
+        budgetMax: parseFloat(form.budgetMax) || 0
+      })
+      onSave(res.data)
+    } catch { alert('Failed to update') }
+    finally { setLoading(false) }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end justify-center">
+      <div className="bg-white w-full max-w-md rounded-t-3xl p-6 max-h-screen overflow-y-auto">
+        <div className="flex justify-between items-center mb-6">
+          <div className="text-xl font-black text-gray-900">Edit listing</div>
+          <button onClick={onClose} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold">✕</button>
+        </div>
+        <div className="mb-4"><label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Title</label>
+          <input name="title" value={form.title} onChange={handle} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/></div>
+        <div className="mb-4"><label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Description</label>
+          <textarea name="description" value={form.description} onChange={handle} rows={3} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 resize-none"/></div>
+        <div className="mb-4"><label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Category</label>
+          <select name="category" value={form.category} onChange={handle} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400">
+            {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+          </select></div>
+        <div className="mb-4"><label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Type</label>
+          <div className="flex gap-2">{['offering','seeking'].map(t => <button key={t} onClick={() => setForm({...form,type:t})} className={`flex-1 py-2 rounded-xl text-sm font-bold capitalize ${form.type===t?'bg-gray-900 text-white':'bg-gray-100 text-gray-500'}`}>{t}</button>)}</div></div>
+        <div className="mb-4"><label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Area</label>
+          <input name="area" value={form.area} onChange={handle} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/></div>
+        <div className="mb-6"><label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Budget (₹)</label>
+          <div className="flex gap-2">
+            <input name="budgetMin" value={form.budgetMin} onChange={handle} placeholder="Min" type="number" className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+            <input name="budgetMax" value={form.budgetMax} onChange={handle} placeholder="Max" type="number" className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+          </div></div>
+        <button onClick={save} disabled={loading} className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700 disabled:opacity-50">
+          {loading ? 'Saving...' : 'Save changes →'}
+        </button>
+      </div>
+    </div>
+  )
+}
 
 function ProfilePage({ userId, currentUser, onBack, onOpenRequests, onOpenSentRequests }) {
   const [user, setUser] = useState(null)
   const [listings, setListings] = useState([])
   const [loading, setLoading] = useState(true)
+  const [editingListing, setEditingListing] = useState(null)
 
   useEffect(() => {
     Promise.all([
@@ -597,17 +656,54 @@ function ProfilePage({ userId, currentUser, onBack, onOpenRequests, onOpenSentRe
         <div className="px-5 mt-5">
           <div className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">{listings.length > 0 ? `${listings.length} listings` : 'No listings yet'}</div>
           {listings.map(listing => (
-            <div key={listing.id} className="bg-white rounded-2xl p-4 mb-3 shadow-sm border border-gray-100">
-              <div className="flex justify-between items-start mb-2">
-                <span className="text-xs font-bold px-2 py-1 rounded-lg bg-teal-50 text-teal-700">{listing.category}</span>
-                <span className="text-xs text-gray-400 capitalize">{listing.type}</span>
-              </div>
-              <h3 className="font-bold text-gray-900 mb-1 text-sm">{listing.title}</h3>
-              <p className="text-xs text-gray-500 mb-2">{listing.description}</p>
-              <div className="text-sm font-bold text-gray-900">₹{listing.budgetMin}–{listing.budgetMax}</div>
-            </div>
-          ))}
+  <div key={listing.id} className="bg-white rounded-2xl p-4 mb-3 shadow-sm border border-gray-100">
+    <div className="flex justify-between items-start mb-2">
+      <span className="text-xs font-bold px-2 py-1 rounded-lg bg-teal-50 text-teal-700">{listing.category}</span>
+      <span className="text-xs text-gray-400 capitalize">{listing.type}</span>
+    </div>
+    <h3 className="font-bold text-gray-900 mb-1 text-sm">{listing.title}</h3>
+    <p className="text-xs text-gray-500 mb-2">{listing.description}</p>
+    <div className="flex justify-between items-center mt-2">
+      <div className="text-sm font-bold text-gray-900">₹{listing.budgetMin}–{listing.budgetMax}</div>
+      {isOwnProfile && (
+        <div className="flex gap-2">
+          <button onClick={() => setEditingListing(listing)}
+            className="text-xs font-semibold text-teal-600 bg-teal-50 px-3 py-1.5 rounded-xl hover:bg-teal-100">
+            ✏️ Edit
+          </button>
+          <button onClick={async () => {
+            if (window.confirm('Delete this listing?')) {
+              await axios.delete(`${API}/api/listings/${listing.id}`)
+              setListings(prev => prev.filter(l => l.id !== listing.id))
+            }
+          }} className="text-xs font-semibold text-red-500 bg-red-50 px-3 py-1.5 rounded-xl hover:bg-red-100">
+            🗑️ Delete
+          </button>
+          <button onClick={async () => {
+            await axios.put(`${API}/api/listings/${listing.id}/close`)
+            setListings(prev => prev.map(l => l.id === listing.id ? {...l, isActive: false} : l))
+          }} className="text-xs font-semibold text-gray-500 bg-gray-50 px-3 py-1.5 rounded-xl hover:bg-gray-100">
+            ✓ Done
+          </button>
         </div>
+      )}
+    </div>
+    {listing.isActive === false && (
+      <div className="mt-2 text-xs text-gray-400 font-medium">✓ Marked as fulfilled</div>
+    )}
+  </div>
+))}
+        </div>
+        {editingListing && (
+  <EditListingModal
+    listing={editingListing}
+    onClose={() => setEditingListing(null)}
+    onSave={(updated) => {
+      setListings(prev => prev.map(l => l.id === updated.id ? updated : l))
+      setEditingListing(null)
+    }}
+  />
+)}
         <div className="h-8"/>
       </div>
     </div>
