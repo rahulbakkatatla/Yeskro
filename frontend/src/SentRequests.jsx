@@ -67,8 +67,16 @@ export default function SentRequests({ currentUser, onBack }) {
                 <div key={req.id} className="bg-white rounded-2xl p-4 mb-3 border border-orange-100 shadow-sm">
                   <div className="font-semibold text-gray-900 text-sm">{req.listing?.title}</div>
                   <div className="text-xs text-gray-500 mt-1">{req.listing?.category} · {req.listing?.area}</div>
-                  <div className="text-xs text-orange-500 mt-2 font-medium">Waiting for approval...</div>
-                </div>
+                  <div className="flex justify-between items-center mt-2">
+                    <div className="text-xs text-orange-500 font-medium">Waiting for approval...</div>
+                    <button onClick={async () => {
+                      await axios.delete(`${API}/api/contact-requests/${req.id}`)
+                       setRequests(prev => prev.filter(r => r.id !== req.id))
+          }} className="text-xs text-gray-400 hover:text-red-500 font-medium">
+      Cancel
+    </button>
+  </div>
+</div>
               ))}
             </>
           )}

@@ -99,4 +99,11 @@ public class ContactRequestController {
         contactRequestRepository.save(req);
         return ResponseEntity.ok(req);
     }
+
+    @DeleteMapping("/contact-requests/{id}")
+    public ResponseEntity<?> deleteRequest(@PathVariable Long id) {
+        if (!contactRequestRepository.existsById(id)) return ResponseEntity.notFound().build();
+        contactRequestRepository.deleteById(id);
+        return ResponseEntity.ok("Deleted");
+    }
 }
