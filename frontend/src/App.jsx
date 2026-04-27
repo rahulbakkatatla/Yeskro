@@ -364,6 +364,16 @@ function AuthPage({ onAuth }) {
 function ListingCard({ listing, onProfileClick, currentUser, sentRequestsMap, setSentRequestsMap, onOpenSentRequests }) {
   const [requesting, setRequesting] = useState(false)
   const status = sentRequestsMap?.[listing.id]
+  const timeAgo = (dateStr) => {
+  const now = new Date()
+  const date = new Date(dateStr)
+  const diff = Math.floor((now - date) / 1000)
+  if (diff < 60) return 'just now'
+  if (diff < 3600) return `${Math.floor(diff/60)}m ago`
+  if (diff < 86400) return `${Math.floor(diff/3600)}h ago`
+  if (diff < 604800) return `${Math.floor(diff/86400)}d ago`
+  return `${Math.floor(diff/604800)}w ago`
+  }
   const initials = listing.user?.name ? listing.user.name.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase() : '??'
   const isOwn = currentUser?.id === listing.user?.id
 
@@ -388,7 +398,10 @@ function ListingCard({ listing, onProfileClick, currentUser, sentRequestsMap, se
     <div className="bg-white rounded-2xl p-4 mb-3 shadow-sm border border-gray-100 hover:border-teal-300 hover:shadow-md transition-all">
       <div className="flex justify-between items-start mb-2">
         <span className="text-xs font-bold px-2 py-1 rounded-lg bg-teal-50 text-teal-700">{listing.category}</span>
-        <span className="text-xs text-gray-400 capitalize">{listing.type}</span>
+        <div className="flex flex-col items-end gap-1">
+          <span className="text-xs text-gray-400 capitalize">{listing.type}</span>
+           <span className="text-xs text-gray-300">{timeAgo(listing.createdAt)}</span>
+        </div>
       </div>
       <h3 className="font-bold text-gray-900 mb-1 text-sm leading-tight">{listing.title}</h3>
       <p className="text-xs text-gray-500 mb-3 leading-relaxed">{listing.description}</p>
