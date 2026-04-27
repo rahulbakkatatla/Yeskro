@@ -839,7 +839,7 @@ function App() {
     try {
       setLoading(true)
       const res = await axios.get(`${API}/api/listings`)
-      setListings(res.data)
+      setListings(res.data.filter(l => l.isActive !== false))
       setError(null)
     } catch { setError('Could not load listings.') }
     finally { setLoading(false) }
