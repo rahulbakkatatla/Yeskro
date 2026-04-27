@@ -626,7 +626,7 @@ function PostModal({ onClose, onSuccess, currentUser }) {
       setLoading(true); setError(null)
       await axios.post(`${API}/api/listings`, { ...form, budgetMin: parseFloat(form.budgetMin)||0, budgetMax: parseFloat(form.budgetMax)||0, user: { id: currentUser.id } })
       mixpanel.track('Listing Posted', { category: form.category, type: form.type })
-      onSuccess()
+      onSuccess('Listing posted successfully! 🎉')
     } catch { setError('Failed to post.') }
     finally { setLoading(false) }
   }
@@ -669,6 +669,7 @@ function App() {
   const [currentUser, setCurrentUser] = useState(null)
   const [viewingProfile, setViewingProfile] = useState(null)
   const [page, setPage] = useState('feed')
+  const [successMsg, setSuccessMsg] = useState(null)
   const [sentRequestsMap, setSentRequestsMap] = useState({})
 
   useEffect(() => {
@@ -743,6 +744,12 @@ function App() {
           <div className="flex gap-2 px-5 pb-4 overflow-x-auto">{['All',...CATEGORIES].map(cat => <button key={cat} onClick={() => setActivecat(cat)} className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap ${activecat===cat?'bg-gray-900 text-white':'bg-gray-100 text-gray-500'}`}>{cat}</button>)}</div>
         </div>
         <div className="px-5 pt-4">
+          {successMsg && (
+           <div className="bg-green-50 border border-green-200 rounded-2xl p-4 mb-4 text-sm text-green-700 font-medium flex justify-between items-center">
+             {successMsg}
+            <button onClick={() => setSuccessMsg(null)} className="text-green-400 font-bold">✕</button>
+          </div>
+          )}
           <div className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">{filtered.length} listings · Hyderabad</div>
           {loading && <div className="text-center py-16 text-gray-400"><div className="text-3xl mb-3">⟳</div><div className="text-sm">Loading...</div></div>}
           {error && <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-center"><div className="text-red-600 text-sm">{error}</div><button onClick={fetchListings} className="mt-2 text-xs text-red-400 underline">Try again</button></div>}
@@ -750,7 +757,7 @@ function App() {
           {!loading && filtered.map(listing => <ListingCard key={listing.id} listing={listing} onProfileClick={handleProfileClick} currentUser={currentUser} sentRequestsMap={sentRequestsMap} setSentRequestsMap={setSentRequestsMap} onOpenSentRequests={() => setPage('sentrequests')} />)}
         </div>
       </div>
-      {showModal && <PostModal onClose={() => setShowModal(false)} onSuccess={() => { setShowModal(false); fetchListings() }} currentUser={currentUser} />}
+        {showModal && <PostModal onClose={() => setShowModal(false)} onSuccess={(msg) => { setShowModal(false); fetchListings(); setSuccessMsg(msg) }} currentUser={currentUser} />}
     </div>
   )
 }
