@@ -1012,7 +1012,9 @@ function App() {
     l.area?.toLowerCase().includes(search.toLowerCase()) ||
     l.city?.toLowerCase().includes(search.toLowerCase()) ||
     l.user?.name?.toLowerCase().includes(search.toLowerCase())
-  const matchCity = filters.city ? l.city?.toLowerCase().includes(filters.city.toLowerCase()) :
+  const matchCity = filters.city ? 
+    l.city?.toLowerCase().includes(filters.city.toLowerCase()) || 
+    l.area?.toLowerCase().includes(filters.city.toLowerCase()) :
     !cityFilter || !currentUser?.city || l.city?.toLowerCase() === currentUser?.city?.toLowerCase()
   const matchArea = !filters.area || l.area?.toLowerCase().includes(filters.area.toLowerCase())
   const matchType = filters.type === 'all' || l.type === filters.type
