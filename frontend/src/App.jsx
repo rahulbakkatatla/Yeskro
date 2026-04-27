@@ -11,7 +11,7 @@ import { TermsPage, PrivacyPage } from './Legal'
 const API = 'https://worbid.onrender.com'
 const CATEGORIES = ['Home Services', 'Electronics', 'Furniture', 'Vehicles', 'Music', 'Labour', 'Tutoring', 'Driving', 'Food', 'Beauty', 'Events', 'Other']
 
-function AuthPage({ onAuth }) {
+function AuthPage({ onAuth, onLegal }) {
   const [tab, setTab] = useState('login')
   const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
@@ -363,6 +363,12 @@ function AuthPage({ onAuth }) {
             </button>
           </div>
         )}
+      <div className="text-center mt-4 text-xs text-gray-300">
+          By using Worbid you agree to our{' '}
+          <button onClick={() => onLegal('terms')} className="text-teal-400 underline">Terms</button>
+          {' '}and{' '}
+          <button onClick={() => onLegal('privacy')} className="text-teal-400 underline">Privacy Policy</button>
+        </div>
       </div>
     </div>
   )
