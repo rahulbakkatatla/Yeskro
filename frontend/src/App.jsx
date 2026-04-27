@@ -7,7 +7,7 @@ import PhoneInput from 'react-phone-number-input'
 import 'react-phone-number-input/style.css'
 import { auth } from './firebase'
 import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth'
-
+import { TermsPage, PrivacyPage } from './Legal'
 const API = 'https://worbid.onrender.com'
 const CATEGORIES = ['Home Services', 'Electronics', 'Furniture', 'Vehicles', 'Music', 'Labour', 'Tutoring', 'Driving', 'Food', 'Beauty', 'Events', 'Other']
 
@@ -832,6 +832,7 @@ function App() {
   const [page, setPage] = useState('feed')
   const [successMsg, setSuccessMsg] = useState(null)
   const [sentRequestsMap, setSentRequestsMap] = useState({})
+  const [legalPage, setLegalPage] = useState(null)
 
   useEffect(() => {
     const saved = localStorage.getItem('worbid_user')
@@ -887,8 +888,9 @@ function App() {
     const matchCity = !cityFilter || !currentUser?.city || l.city?.toLowerCase() === currentUser?.city?.toLowerCase()
     return matchCat && matchSearch && matchCity
   })
-
-  if (!currentUser) return <AuthPage onAuth={handleAuth} />
+  if (legalPage === 'terms') return <TermsPage onBack={() => setLegalPage(null)} />
+  if (legalPage === 'privacy') return <PrivacyPage onBack={() => setLegalPage(null)} />
+  if (!currentUser) return <AuthPage onAuth={handleAuth} onLegal={setLegalPage} />
   if (page === 'requests') return <RequestsInbox currentUser={currentUser} onBack={() => setPage('feed')} />
   if (page === 'sentrequests') return <SentRequests currentUser={currentUser} onBack={() => setPage('feed')} />
   if (page === 'profile' && viewingProfile) return <ProfilePage userId={viewingProfile} currentUser={currentUser} onBack={() => setPage('feed')} onOpenRequests={() => setPage('requests')} onOpenSentRequests={() => setPage('sentrequests')} />
