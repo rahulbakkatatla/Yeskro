@@ -391,16 +391,9 @@ function ListingCard({ listing, onProfileClick, currentUser, sentRequestsMap, se
     await axios.post(`${API}/api/listings/${listing.id}/request-contact?requesterId=${currentUser.id}`)
     setSentRequestsMap(prev => ({...prev, [listing.id]: 'pending'}))
     mixpanel.track('Connect Requested', { category: listing.category })
-    const posterPhone = listing.user?.phone
-    if (posterPhone) {
-      const phone = posterPhone.replace(/\D/g, '')
-      const message = encodeURIComponent(`Hi! I saw your listing "${listing.title}" on Worbid and sent a connect request. Please approve it at worbid.vercel.app 🙏`)
-      window.open(`https://wa.me/91${phone}?text=${message}`, '_blank')
-    }
   } catch { setSentRequestsMap(prev => ({...prev, [listing.id]: 'pending'})) }
   finally { setRequesting(false) }
 }
-
   return (
     <div className="bg-white rounded-2xl p-4 mb-3 shadow-sm border border-gray-100 hover:border-teal-300 hover:shadow-md transition-all">
       <div className="flex justify-between items-start mb-2">
@@ -471,12 +464,7 @@ function RequestsInbox({ currentUser, onBack }) {
   const handleApprove = async (id) => {
   await axios.put(`${API}/api/contact-requests/${id}/approve`)
   setRequests(prev => prev.map(r => r.id === id ? {...r, status: 'approved'} : r))
-  const req = requests.find(r => r.id === id)
-  if (req?.requester?.phone) {
-    const phone = req.requester.phone.replace(/\D/g, '')
-    const message = encodeURIComponent(`Hi! Your connect request on Worbid has been approved 🎉 You can now see the contact number on worbid.vercel.app`)
-    window.open(`https://wa.me/91${phone}?text=${message}`, '_blank')
-  }
+  
   }
 
   const handleReject = async (id) => {
