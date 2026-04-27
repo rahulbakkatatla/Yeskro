@@ -462,8 +462,14 @@ function RequestsInbox({ currentUser, onBack }) {
   }, [currentUser.id])
 
   const handleApprove = async (id) => {
-    await axios.put(`${API}/api/contact-requests/${id}/approve`)
-    setRequests(prev => prev.map(r => r.id === id ? {...r, status: 'approved'} : r))
+  await axios.put(`${API}/api/contact-requests/${id}/approve`)
+  setRequests(prev => prev.map(r => r.id === id ? {...r, status: 'approved'} : r))
+  const req = requests.find(r => r.id === id)
+  if (req?.requester?.phone) {
+    const phone = req.requester.phone.replace(/\D/g, '')
+    const message = encodeURIComponent(`Hi! Your connect request on Worbid has been approved 🎉 You can now see the contact number on worbid.vercel.app`)
+    window.open(`https://wa.me/91${phone}?text=${message}`, '_blank')
+  }
   }
 
   const handleReject = async (id) => {
