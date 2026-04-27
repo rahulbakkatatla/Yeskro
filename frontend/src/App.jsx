@@ -665,6 +665,7 @@ function App() {
   const [error, setError] = useState(null)
   const [search, setSearch] = useState('')
   const [activecat, setActivecat] = useState('All')
+  const [cityFilter, setCityFilter] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [currentUser, setCurrentUser] = useState(null)
   const [viewingProfile, setViewingProfile] = useState(null)
@@ -719,7 +720,8 @@ function App() {
   const filtered = listings.filter(l => {
     const matchCat = activecat === 'All' || l.category === activecat
     const matchSearch = l.title.toLowerCase().includes(search.toLowerCase()) || l.description?.toLowerCase().includes(search.toLowerCase())
-    return matchCat && matchSearch
+    const matchCity = !cityFilter || !currentUser?.city || l.city?.toLowerCase() === currentUser?.city?.toLowerCase()
+    return matchCat && matchSearch && matchCity
   })
 
   if (!currentUser) return <AuthPage onAuth={handleAuth} />
@@ -750,7 +752,12 @@ function App() {
             <button onClick={() => setSuccessMsg(null)} className="text-green-400 font-bold">✕</button>
           </div>
           )}
-          <div className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">{filtered.length} listings · Hyderabad</div>
+          <div className="flex justify-between items-center mb-3">
+         <div className="text-xs font-bold uppercase tracking-widest text-gray-400">{filtered.length} listings · {currentUser?.city || 'All'}</div>
+            <button onClick={() => setCityFilter(!cityFilter)} className={`text-xs font-semibold px-3 py-1 rounded-full ${cityFilter ? 'bg-teal-500 text-white' : 'bg-gray-100 text-gray-500'}`}>
+                {cityFilter ? '📍 My City' : '🌍 All Cities'}
+            </button>
+          </div>
           {loading && <div className="text-center py-16 text-gray-400"><div className="text-3xl mb-3">⟳</div><div className="text-sm">Loading...</div></div>}
           {error && <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-center"><div className="text-red-600 text-sm">{error}</div><button onClick={fetchListings} className="mt-2 text-xs text-red-400 underline">Try again</button></div>}
           {!loading && !error && filtered.length === 0 && <div className="text-center py-16 text-gray-400"><div className="text-3xl mb-3">🔍</div><div className="text-sm">No listings found</div></div>}
