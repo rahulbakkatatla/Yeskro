@@ -754,9 +754,17 @@ function ProfilePage({ userId, currentUser, onBack, onOpenRequests, onOpenSentRe
             user={user}
             onClose={() => setEditingProfile(false)}
             onSave={(updated) => {
-              setUser(updated)
-              setEditingProfile(false)
-            }}
+            setUser(updated)
+            setEditingProfile(false)
+            // Update localStorage if this is the current user
+            const saved = localStorage.getItem('worbid_user')
+            if (saved) {
+               const localUser = JSON.parse(saved)
+              if (localUser.id === updated.id) {
+                localStorage.setItem('worbid_user', JSON.stringify(updated))
+              }
+            }
+        }}
           />
         )}
         <div className="h-8"/>
