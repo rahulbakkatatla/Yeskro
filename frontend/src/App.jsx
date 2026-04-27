@@ -600,11 +600,67 @@ function EditListingModal({ listing, onClose, onSave }) {
   )
 }
 
+function EditProfileModal({ user, onClose, onSave }) {
+  const [form, setForm] = useState({
+    name: user.name || '',
+    area: user.area || '',
+    city: user.city || '',
+    bio: user.bio || '',
+    email: user.email || ''
+  })
+  const [loading, setLoading] = useState(false)
+  const handle = (e) => setForm({...form, [e.target.name]: e.target.value})
+
+  const save = async () => {
+    try {
+      setLoading(true)
+      const res = await axios.put(`${API}/api/users/profile`, { ...user, ...form })
+      onSave(res.data)
+    } catch { alert('Failed to update profile') }
+    finally { setLoading(false) }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end justify-center">
+      <div className="bg-white w-full max-w-md rounded-t-3xl p-6 max-h-screen overflow-y-auto">
+        <div className="flex justify-between items-center mb-6">
+          <div className="text-xl font-black text-gray-900">Edit profile</div>
+          <button onClick={onClose} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold">✕</button>
+        </div>
+        <div className="mb-4">
+          <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Full name</label>
+          <input name="name" value={form.name} onChange={handle} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+        </div>
+        <div className="mb-4">
+          <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Area</label>
+          <input name="area" value={form.area} onChange={handle} placeholder="e.g. Banjara Hills" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+        </div>
+        <div className="mb-4">
+          <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">City</label>
+          <input name="city" value={form.city} onChange={handle} placeholder="e.g. Hyderabad" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+        </div>
+        <div className="mb-4">
+          <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Bio</label>
+          <textarea name="bio" value={form.bio} onChange={handle} rows={3} placeholder="Tell people what you can do..." className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 resize-none"/>
+        </div>
+        <div className="mb-6">
+          <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Email (for notifications)</label>
+          <input name="email" value={form.email} onChange={handle} placeholder="your@email.com" type="email" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+        </div>
+        <button onClick={save} disabled={loading} className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700 disabled:opacity-50">
+          {loading ? 'Saving...' : 'Save profile →'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function ProfilePage({ userId, currentUser, onBack, onOpenRequests, onOpenSentRequests }) {
   const [user, setUser] = useState(null)
   const [listings, setListings] = useState([])
   const [loading, setLoading] = useState(true)
   const [editingListing, setEditingListing] = useState(null)
+  const [editingProfile, setEditingProfile] = useState(false)
 
   useEffect(() => {
     Promise.all([
@@ -629,9 +685,10 @@ function ProfilePage({ userId, currentUser, onBack, onOpenRequests, onOpenSentRe
           <div className="font-bold text-gray-900">Profile</div>
           {isOwnProfile && (
             <div className="ml-auto flex gap-2">
-              <button onClick={onOpenSentRequests} className="text-xs font-semibold bg-teal-50 text-teal-600 px-3 py-1.5 rounded-xl">🤝 Sent</button>
-              <button onClick={onOpenRequests} className="text-xs font-semibold bg-orange-50 text-orange-600 px-3 py-1.5 rounded-xl">📬 Inbox</button>
-            </div>
+            <button onClick={() => setEditingProfile(true)} className="text-xs font-semibold bg-gray-100 text-gray-600 px-3 py-1.5 rounded-xl">✏️ Edit</button>
+            <button onClick={onOpenSentRequests} className="text-xs font-semibold bg-teal-50 text-teal-600 px-3 py-1.5 rounded-xl">🤝 Sent</button>
+            <button onClick={onOpenRequests} className="text-xs font-semibold bg-orange-50 text-orange-600 px-3 py-1.5 rounded-xl">📬 Inbox</button>
+          </div>
           )}
         </div>
         <div className="bg-white mx-5 mt-5 rounded-2xl p-6 shadow-sm border border-gray-100">
@@ -695,20 +752,31 @@ function ProfilePage({ userId, currentUser, onBack, onOpenRequests, onOpenSentRe
 ))}
         </div>
         {editingListing && (
-  <EditListingModal
-    listing={editingListing}
-    onClose={() => setEditingListing(null)}
-    onSave={(updated) => {
-      setListings(prev => prev.map(l => l.id === updated.id ? updated : l))
-      setEditingListing(null)
-    }}
-  />
-)}
+          <EditListingModal
+            listing={editingListing}
+            onClose={() => setEditingListing(null)}
+            onSave={(updated) => {
+              setListings(prev => prev.map(l => l.id === updated.id ? updated : l))
+              setEditingListing(null)
+            }}
+          />
+        )}
+        {editingProfile && user && (
+          <EditProfileModal
+            user={user}
+            onClose={() => setEditingProfile(false)}
+            onSave={(updated) => {
+              setUser(updated)
+              setEditingProfile(false)
+            }}
+          />
+        )}
         <div className="h-8"/>
       </div>
     </div>
   )
 }
+    
 
 function PostModal({ onClose, onSuccess, currentUser }) {
   const [form, setForm] = useState({ title: '', description: '', category: 'Home Services', type: 'offering', area: currentUser?.area || '', city: currentUser?.city || 'Hyderabad', budgetMin: '', budgetMax: '' })
