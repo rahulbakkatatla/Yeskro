@@ -19,8 +19,15 @@ public class ListingController {
     }
 
     @PostMapping
-    public Listing createListing(@RequestBody Listing listing) {
-        return listingRepository.save(listing);
+    public ResponseEntity<?> createListing(@RequestBody Listing listing) {
+        if (listing.getUser() != null && listing.getUser().getId() != null) {
+            List<Listing> existing = listingRepository.findByUserId(listing.getUser().getId());
+            long activeCount = existing.stream().filter(l -> l.getIsActive() != Boolean.FALSE).count();
+            if (activeCount >= 5) {
+                return ResponseEntity.badRequest().body("You can only have 5 active listings at a time. Close or delete existing ones first.");
+            }
+        }
+        return ResponseEntity.ok(listingRepository.save(listing));
     }
 
     @GetMapping("/user/{userId}")
