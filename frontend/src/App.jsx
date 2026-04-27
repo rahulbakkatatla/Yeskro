@@ -719,7 +719,11 @@ function App() {
 
   const filtered = listings.filter(l => {
     const matchCat = activecat === 'All' || l.category === activecat
-    const matchSearch = l.title.toLowerCase().includes(search.toLowerCase()) || l.description?.toLowerCase().includes(search.toLowerCase())
+    const matchSearch = l.title.toLowerCase().includes(search.toLowerCase()) || 
+      l.description?.toLowerCase().includes(search.toLowerCase()) ||
+      l.area?.toLowerCase().includes(search.toLowerCase()) ||
+      l.city?.toLowerCase().includes(search.toLowerCase()) ||
+      l.user?.name?.toLowerCase().includes(search.toLowerCase())
     const matchCity = !cityFilter || !currentUser?.city || l.city?.toLowerCase() === currentUser?.city?.toLowerCase()
     return matchCat && matchSearch && matchCity
   })
