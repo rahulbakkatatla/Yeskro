@@ -841,6 +841,100 @@ function PostModal({ onClose, onSuccess, currentUser }) {
   )
 }
 
+function FilterModal({ filters, setFilters, onClose, onReset }) {
+  const [local, setLocal] = useState(filters)
+  const handle = (key, value) => setLocal(prev => ({...prev, [key]: value}))
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end justify-center">
+      <div className="bg-white w-full max-w-md rounded-t-3xl p-6 max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-6">
+          <div className="text-xl font-black text-gray-900">Filters</div>
+          <div className="flex gap-2">
+            <button onClick={() => { onReset(); onClose() }} className="text-xs text-gray-400 hover:text-red-500 font-medium">Reset all</button>
+            <button onClick={onClose} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold">✕</button>
+          </div>
+        </div>
+
+        <div className="mb-5">
+          <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">City</label>
+          <input value={local.city} onChange={e => handle('city', e.target.value)}
+            placeholder="e.g. Mumbai, Hyderabad, Delhi"
+            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+        </div>
+
+        <div className="mb-5">
+          <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Area</label>
+          <input value={local.area} onChange={e => handle('area', e.target.value)}
+            placeholder="e.g. Banjara Hills, Andheri"
+            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+        </div>
+
+        <div className="mb-5">
+          <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Type</label>
+          <div className="flex gap-2">
+            {[['all', 'All'], ['offering', '🙋 Offering'], ['seeking', '🤝 Seeking']].map(([val, label]) => (
+              <button key={val} onClick={() => handle('type', val)}
+                className={`flex-1 py-2.5 rounded-xl text-xs font-bold ${local.type === val ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500'}`}>
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="mb-5">
+          <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Budget Range (₹)</label>
+          <div className="flex gap-2">
+            <input value={local.minBudget} onChange={e => handle('minBudget', e.target.value)}
+              placeholder="Min" type="number"
+              className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+            <input value={local.maxBudget} onChange={e => handle('maxBudget', e.target.value)}
+              placeholder="Max" type="number"
+              className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+          </div>
+        </div>
+
+        <div className="mb-5">
+          <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Posted</label>
+          <div className="flex gap-2">
+            {[['all', 'Any time'], ['today', 'Today'], ['week', 'This week'], ['month', 'This month']].map(([val, label]) => (
+              <button key={val} onClick={() => handle('timeRange', val)}
+                className={`flex-1 py-2 rounded-xl text-xs font-bold ${local.timeRange === val ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500'}`}>
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="mb-5">
+          <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Sort by</label>
+          <div className="flex gap-2">
+            {[['newest', 'Newest'], ['price_low', 'Price ↑'], ['price_high', 'Price ↓']].map(([val, label]) => (
+              <button key={val} onClick={() => handle('sortBy', val)}
+                className={`flex-1 py-2.5 rounded-xl text-xs font-bold ${local.sortBy === val ? 'bg-teal-500 text-white' : 'bg-gray-100 text-gray-500'}`}>
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="mb-6">
+          <div className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3">
+            <label className="text-sm font-semibold text-gray-700">Verified users only</label>
+            <input type="checkbox" checked={local.verifiedOnly} onChange={e => handle('verifiedOnly', e.target.checked)}
+              className="w-5 h-5 accent-teal-500"/>
+          </div>
+        </div>
+
+        <button onClick={() => { setFilters(local); onClose() }}
+          className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700">
+          Apply Filters →
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function App() {
   const [listings, setListings] = useState([])
   const [loading, setLoading] = useState(true)
@@ -855,6 +949,17 @@ function App() {
   const [successMsg, setSuccessMsg] = useState(null)
   const [sentRequestsMap, setSentRequestsMap] = useState({})
   const [legalPage, setLegalPage] = useState(null)
+  const [showFilters, setShowFilters] = useState(false)
+  const [filters, setFilters] = useState({
+  city: '',
+  area: '',
+  type: 'all',
+  minBudget: '',
+  maxBudget: '',
+  timeRange: 'all',
+  sortBy: 'newest',
+  verifiedOnly: false
+  })
 
   useEffect(() => {
     const saved = localStorage.getItem('worbid_user')
@@ -901,15 +1006,30 @@ function App() {
   const handleProfileClick = (userId) => { setViewingProfile(userId); setPage('profile') }
 
   const filtered = listings.filter(l => {
-    const matchCat = activecat === 'All' || l.category === activecat
-    const matchSearch = l.title.toLowerCase().includes(search.toLowerCase()) || 
-      l.description?.toLowerCase().includes(search.toLowerCase()) ||
-      l.area?.toLowerCase().includes(search.toLowerCase()) ||
-      l.city?.toLowerCase().includes(search.toLowerCase()) ||
-      l.user?.name?.toLowerCase().includes(search.toLowerCase())
-    const matchCity = !cityFilter || !currentUser?.city || l.city?.toLowerCase() === currentUser?.city?.toLowerCase()
-    return matchCat && matchSearch && matchCity
-  })
+  const matchCat = activecat === 'All' || l.category === activecat
+  const matchSearch = !search || l.title.toLowerCase().includes(search.toLowerCase()) || 
+    l.description?.toLowerCase().includes(search.toLowerCase()) ||
+    l.area?.toLowerCase().includes(search.toLowerCase()) ||
+    l.city?.toLowerCase().includes(search.toLowerCase()) ||
+    l.user?.name?.toLowerCase().includes(search.toLowerCase())
+  const matchCity = filters.city ? l.city?.toLowerCase().includes(filters.city.toLowerCase()) :
+    !cityFilter || !currentUser?.city || l.city?.toLowerCase() === currentUser?.city?.toLowerCase()
+  const matchArea = !filters.area || l.area?.toLowerCase().includes(filters.area.toLowerCase())
+  const matchType = filters.type === 'all' || l.type === filters.type
+  const matchMinBudget = !filters.minBudget || l.budgetMax >= parseFloat(filters.minBudget)
+  const matchMaxBudget = !filters.maxBudget || l.budgetMin <= parseFloat(filters.maxBudget)
+  const matchVerified = !filters.verifiedOnly || l.user?.isVerified
+  const matchTime = filters.timeRange === 'all' || (() => {
+    const days = filters.timeRange === 'today' ? 1 : filters.timeRange === 'week' ? 7 : 30
+    return new Date(l.createdAt) > new Date(Date.now() - days * 86400000)
+  })()
+  return matchCat && matchSearch && matchCity && matchArea && matchType && matchMinBudget && matchMaxBudget && matchVerified && matchTime
+}).sort((a, b) => {
+  if (filters.sortBy === 'newest') return new Date(b.createdAt) - new Date(a.createdAt)
+  if (filters.sortBy === 'price_low') return a.budgetMin - b.budgetMin
+  if (filters.sortBy === 'price_high') return b.budgetMin - a.budgetMin
+  return 0
+})
   if (legalPage === 'terms') return <TermsPage onBack={() => setLegalPage(null)} />
   if (legalPage === 'privacy') return <PrivacyPage onBack={() => setLegalPage(null)} />
   if (!currentUser) return <AuthPage onAuth={handleAuth} onLegal={setLegalPage} />
@@ -930,8 +1050,12 @@ function App() {
               <button onClick={handleLogout} className="text-xs text-gray-400 hover:text-gray-600">logout</button>
             </div>
           </div>
-          <div className="px-5 pb-3"><input type="text" placeholder="Search listings..." value={search} onChange={e => setSearch(e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/></div>
-          <div className="flex gap-2 px-5 pb-4 overflow-x-auto">{['All',...CATEGORIES].map(cat => <button key={cat} onClick={() => setActivecat(cat)} className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap ${activecat===cat?'bg-gray-900 text-white':'bg-gray-100 text-gray-500'}`}>{cat}</button>)}</div>
+          <div className="px-5 pb-3 flex gap-2">
+            <input type="text" placeholder="Search listings..." value={search} onChange={e => setSearch(e.target.value)} className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+            <button onClick={() => setShowFilters(true)} className={`px-4 py-3 rounded-xl text-sm font-bold border ${Object.values(filters).some(v => v && v !== 'all' && v !== 'newest' && v !== false) ? 'bg-teal-500 text-white border-teal-500' : 'bg-gray-50 text-gray-600 border-gray-200'}`}>
+              ⚙️
+            </button>
+            </div>          <div className="flex gap-2 px-5 pb-4 overflow-x-auto">{['All',...CATEGORIES].map(cat => <button key={cat} onClick={() => setActivecat(cat)} className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap ${activecat===cat?'bg-gray-900 text-white':'bg-gray-100 text-gray-500'}`}>{cat}</button>)}</div>
         </div>
         <div className="px-5 pt-4">
           {successMsg && (
@@ -953,6 +1077,7 @@ function App() {
         </div>
       </div>
         {showModal && <PostModal onClose={() => setShowModal(false)} onSuccess={(msg) => { setShowModal(false); fetchListings(); setSuccessMsg(msg) }} currentUser={currentUser} />}
+        {showFilters && <FilterModal filters={filters} setFilters={setFilters} onClose={() => setShowFilters(false)} onReset={() => setFilters({ city: '', area: '', type: 'all', minBudget: '', maxBudget: '', timeRange: 'all', sortBy: 'newest', verifiedOnly: false })} />}
     </div>
   )
 }
