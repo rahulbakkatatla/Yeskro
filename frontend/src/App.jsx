@@ -9,7 +9,7 @@ import { auth } from './firebase'
 import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth'
 
 const API = 'https://worbid.onrender.com'
-const CATEGORIES = ['Home Services', 'Music', 'Labour', 'Tutoring', 'Driving', 'Other']
+const CATEGORIES = ['Home Services', 'Electronics', 'Furniture', 'Vehicles', 'Music', 'Labour', 'Tutoring', 'Driving', 'Food', 'Beauty', 'Events', 'Other']
 
 function AuthPage({ onAuth }) {
   const [tab, setTab] = useState('login')
@@ -137,9 +137,16 @@ function AuthPage({ onAuth }) {
       <div className="bg-white rounded-3xl p-8 w-full max-w-md shadow-sm border border-gray-100">
         <div className="text-center mb-6">
           <div className="text-3xl font-black text-gray-900 tracking-tight mb-1">Wor<span className="text-teal-500">bid</span></div>
-          <div className="text-sm text-gray-500">
-            {tab === 'login' ? 'Welcome back' : tab === 'register' ? 'Create your account' : 'Reset your password'}
+          {tab === 'login' && (
+          <div className="mt-3 bg-teal-50 rounded-xl p-3 text-xs text-teal-700 text-center leading-relaxed">
+          🌍 Buy, sell, hire and offer locally.<br/>Verified people. No middlemen. Free forever.
           </div>
+          )}
+          {tab === 'register' && (
+          <div className="mt-3 bg-teal-50 rounded-xl p-3 text-xs text-teal-700 text-center leading-relaxed">
+          Your local marketplace for anything.<br/>Sell items, offer services, find help nearby. Free.
+          </div>
+          )}
         </div>
 
         <div id="recaptcha-container"></div>
