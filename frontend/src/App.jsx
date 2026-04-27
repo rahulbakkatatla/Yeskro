@@ -452,6 +452,21 @@ function ListingCard({ listing, onProfileClick, currentUser, sentRequestsMap, se
      )}
     </>
    )}
+   <div className="mt-2 flex justify-between items-center">
+     <button onClick={() => {
+       const text = `${listing.title} — ${listing.area}, ${listing.city}\n₹${listing.budgetMin}–${listing.budgetMax}\nFind this on Worbid: worbid.vercel.app`
+       if (navigator.share) {
+         navigator.share({ title: listing.title, text })
+       } else {
+         navigator.clipboard.writeText(text)
+         alert('Copied to clipboard!')
+       }
+     }} className="text-xs text-gray-400 hover:text-teal-600">🔗 Share</button>
+     {!isOwn && (
+       <button onClick={() => window.open(`mailto:rahulbhaktala@gmail.com?subject=Report Listing&body=Listing ID: ${listing.id}%0ATitle: ${listing.title}%0APosted by: ${listing.user?.name}%0AReason: `)}
+         className="text-xs text-gray-300 hover:text-red-400">🚩 Report</button>
+     )}
+   </div>
     </div>
   )
 }
