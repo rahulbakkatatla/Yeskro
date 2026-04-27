@@ -16,6 +16,7 @@ public class User {
     @Column(unique = true, nullable = false)
     private String phone;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private String password;
     private String name;
     private String photoUrl;
