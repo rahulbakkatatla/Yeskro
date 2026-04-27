@@ -649,7 +649,7 @@ function EditProfileModal({ user, onClose, onSave }) {
   )
 }
 
-function ProfilePage({ userId, currentUser, onBack, onOpenRequests, onOpenSentRequests }) {
+function ProfilePage({ userId, currentUser, onBack, onOpenRequests, onOpenSentRequests, onLogout }) {
   const [user, setUser] = useState(null)
   const [listings, setListings] = useState([])
   const [loading, setLoading] = useState(true)
@@ -682,6 +682,7 @@ function ProfilePage({ userId, currentUser, onBack, onOpenRequests, onOpenSentRe
             <button onClick={() => setEditingProfile(true)} className="text-xs font-semibold bg-gray-100 text-gray-600 px-3 py-1.5 rounded-xl">✏️ Edit</button>
             <button onClick={onOpenSentRequests} className="text-xs font-semibold bg-teal-50 text-teal-600 px-3 py-1.5 rounded-xl">🤝 Sent</button>
             <button onClick={onOpenRequests} className="text-xs font-semibold bg-orange-50 text-orange-600 px-3 py-1.5 rounded-xl">📬 Inbox</button>
+            <button onClick={onLogout} className="text-xs font-semibold bg-red-50 text-red-500 px-3 py-1.5 rounded-xl">Logout</button>
           </div>
           )}
         </div>
@@ -899,8 +900,8 @@ function App() {
   if (!currentUser) return <AuthPage onAuth={handleAuth} onLegal={setLegalPage} />
   if (page === 'requests') return <RequestsInbox currentUser={currentUser} onBack={() => setPage('feed')} />
   if (page === 'sentrequests') return <SentRequests currentUser={currentUser} onBack={() => setPage('feed')} />
-  if (page === 'profile' && viewingProfile) return <ProfilePage userId={viewingProfile} currentUser={currentUser} onBack={() => setPage('feed')} onOpenRequests={() => setPage('requests')} onOpenSentRequests={() => setPage('sentrequests')} />
-  if (page === 'myprofile') return <ProfilePage userId={currentUser.id} currentUser={currentUser} onBack={() => setPage('feed')} onOpenRequests={() => setPage('requests')} onOpenSentRequests={() => setPage('sentrequests')} />
+  if (page === 'profile' && viewingProfile) return <ProfilePage userId={viewingProfile} currentUser={currentUser} onBack={() => setPage('feed')} onOpenRequests={() => setPage('requests')} onOpenSentRequests={() => setPage('sentrequests')} onLogout={handleLogout} />
+  if (page === 'myprofile') return <ProfilePage userId={currentUser.id} currentUser={currentUser} onBack={() => setPage('feed')} onOpenRequests={() => setPage('requests')} onOpenSentRequests={() => setPage('sentrequests')} onLogout={handleLogout}  />
 
   return (
     <div className="min-h-screen bg-gray-50">
