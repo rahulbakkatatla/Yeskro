@@ -948,6 +948,7 @@ function App() {
   const [page, setPage] = useState('feed')
   const [successMsg, setSuccessMsg] = useState(null)
   const [sentRequestsMap, setSentRequestsMap] = useState({})
+  const [inboxCount, setInboxCount] = useState(0)
   const [legalPage, setLegalPage] = useState(null)
   const [showFilters, setShowFilters] = useState(false)
   const [filters, setFilters] = useState({
@@ -967,6 +968,7 @@ function App() {
       const user = JSON.parse(saved)
       setCurrentUser(user)
       fetchSentRequests(user.id)
+      fetchInboxCount(user.id)
   }
   fetchListings()
   }, [])
@@ -992,10 +994,18 @@ function App() {
     } catch { }
   }
 
+  const fetchInboxCount = async (userId) => {
+  try {
+    const res = await axios.get(`${API}/api/users/${userId}/contact-requests`)
+    setInboxCount(res.data.filter(r => r.status === 'pending').length)
+  } catch { }
+  }
+
   const handleAuth = (user, keepLoggedIn) => {
   setCurrentUser(user)
   if (keepLoggedIn) localStorage.setItem('worbid_user', JSON.stringify(user))
   fetchSentRequests(user.id)
+  fetchInboxCount(user.id)
   }
 
   const handleLogout = () => {
