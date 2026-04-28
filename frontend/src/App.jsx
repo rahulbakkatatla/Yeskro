@@ -1048,8 +1048,16 @@ function App() {
             <div className="text-2xl font-black text-gray-900 tracking-tight">Wor<span className="text-teal-500">bid</span></div>
             <div className="flex items-center gap-2">
               <button onClick={() => setPage('myprofile')} className="text-xs font-semibold text-gray-600 hover:text-teal-600">Hi, {currentUser.name.split(' ')[0]}</button>
-              <button onClick={() => setShowModal(true)} className="bg-gray-900 text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-gray-700">+ Post</button>
-              <button onClick={handleLogout} className="text-xs text-gray-400 hover:text-gray-600">logout</button>
+              <button onClick={() => setPage('requests')} className="relative p-1">
+                <span className="text-lg">🔔</span>
+                 {inboxCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center leading-none">
+                  {inboxCount}
+                </span>
+              )}
+              </button>
+            <button onClick={() => setShowModal(true)} className="bg-gray-900 text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-gray-700">+ Post</button>
+            <button onClick={handleLogout} className="text-xs text-gray-400 hover:text-gray-600">logout</button>
             </div>
           </div>
           <div className="px-5 pb-3 flex gap-2">
