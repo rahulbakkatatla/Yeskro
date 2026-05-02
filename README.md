@@ -2,7 +2,7 @@
 
 **Buy, sell, hire and offer locally. Verified people. No middlemen. Free.**
 
-🌍 Live at [Yeskro.com](https://Yeskro.vercel.com)
+🌍 Live at [Yeskro.com](https://Yeskro.com)
 
 ---
 
