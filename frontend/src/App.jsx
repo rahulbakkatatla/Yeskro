@@ -8,7 +8,7 @@ import 'react-phone-number-input/style.css'
 import { auth } from './firebase'
 import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth'
 import { TermsPage, PrivacyPage } from './Legal'
-const API = 'https://Yeskro.onrender.com'
+const API = 'https://worbid.onrender.com'
 const CATEGORIES = ['Home Services', 'Electronics', 'Furniture', 'Vehicles', 'Music', 'Labour', 'Tutoring', 'Driving', 'Food', 'Beauty', 'Events', 'Other']
 
 function AuthPage({ onAuth, onLegal }) {
