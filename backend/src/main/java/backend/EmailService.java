@@ -18,7 +18,7 @@ public class EmailService {
         try {
             Resend resend = new Resend(apiKey);
             CreateEmailOptions params = CreateEmailOptions.builder()
-                .from("Yeskro <onboarding@resend.dev>")
+                .from("Yeskro <notifications@yeskro.in>")
                 .to(toEmail)
                 .subject("New connect request on Yeskro 🔔")
                 .html("<div style='font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px'>" +
@@ -44,7 +44,7 @@ public class EmailService {
         try {
             Resend resend = new Resend(apiKey);
             CreateEmailOptions params = CreateEmailOptions.builder()
-                .from("Yeskro <onboarding@resend.dev>")
+                .from("Yeskro <notifications@yeskro.in>")
                 .to(toEmail)
                 .subject("Your connect request was approved! 🎉")
                 .html("<div style='font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px'>" +
