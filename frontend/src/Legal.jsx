@@ -9,15 +9,15 @@ export function TermsPage({ onBack }) {
         <div className="px-5 py-6 prose prose-sm">
           <p className="text-xs text-gray-400 mb-4">Last updated: April 2026</p>
           <h3 className="font-bold text-gray-900 mb-2">1. Acceptance</h3>
-          <p className="text-sm text-gray-600 mb-4">By using Worbid you agree to these terms. If you do not agree, do not use the platform.</p>
-          <h3 className="font-bold text-gray-900 mb-2">2. What Worbid is</h3>
-          <p className="text-sm text-gray-600 mb-4">Worbid is a platform that connects people locally. We do not provide services ourselves — we connect users who do.</p>
+          <p className="text-sm text-gray-600 mb-4">By using Yeskro you agree to these terms. If you do not agree, do not use the platform.</p>
+          <h3 className="font-bold text-gray-900 mb-2">2. What Yeskro is</h3>
+          <p className="text-sm text-gray-600 mb-4">Yeskro is a platform that connects people locally. We do not provide services ourselves — we connect users who do.</p>
           <h3 className="font-bold text-gray-900 mb-2">3. Your responsibilities</h3>
-          <p className="text-sm text-gray-600 mb-4">You are responsible for all content you post. You must not post illegal, fraudulent, offensive, or misleading content. You must be 18 or older to use Worbid.</p>
+          <p className="text-sm text-gray-600 mb-4">You are responsible for all content you post. You must not post illegal, fraudulent, offensive, or misleading content. You must be 18 or older to use Yeskro.</p>
           <h3 className="font-bold text-gray-900 mb-2">4. Prohibited content</h3>
           <p className="text-sm text-gray-600 mb-4">No adult content. No illegal services. No spam. No fake listings. Violations will result in immediate account removal.</p>
           <h3 className="font-bold text-gray-900 mb-2">5. Liability</h3>
-          <p className="text-sm text-gray-600 mb-4">Worbid is not responsible for transactions between users. Use your own judgment when connecting with others.</p>
+          <p className="text-sm text-gray-600 mb-4">Yeskro is not responsible for transactions between users. Use your own judgment when connecting with others.</p>
           <h3 className="font-bold text-gray-900 mb-2">6. Contact</h3>
           <p className="text-sm text-gray-600 mb-4">For any issues email rahulbhaktala@gmail.com</p>
         </div>

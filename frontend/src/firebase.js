@@ -3,9 +3,9 @@ import { getAuth } from 'firebase/auth'
 
 const firebaseConfig = {
   apiKey: "AIzaSyDAFospG6iJXJAXZRLcsIOJnGniDziyHQA",
-  authDomain: "worbid.firebaseapp.com",
-  projectId: "worbid",
-  storageBucket: "worbid.firebasestorage.app",
+  authDomain: "Yeskro.firebaseapp.com",
+  projectId: "Yeskro",
+  storageBucket: "Yeskro.firebasestorage.app",
   messagingSenderId: "819865730242",
   appId: "1:819865730242:web:e3193445bc5db0f83e4f5b"
 }

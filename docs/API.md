@@ -1,7 +1,7 @@
-# Worbid API Documentation
+# Yeskro API Documentation
 
 Base URL (local): http://localhost:8080
-Base URL (production): https://api.worbid.in
+Base URL (production): https://api.Yeskro.in
 
 ---
 

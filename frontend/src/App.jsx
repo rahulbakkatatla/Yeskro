@@ -8,7 +8,7 @@ import 'react-phone-number-input/style.css'
 import { auth } from './firebase'
 import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth'
 import { TermsPage, PrivacyPage } from './Legal'
-const API = 'https://worbid.onrender.com'
+const API = 'https://Yeskro.onrender.com'
 const CATEGORIES = ['Home Services', 'Electronics', 'Furniture', 'Vehicles', 'Music', 'Labour', 'Tutoring', 'Driving', 'Food', 'Beauty', 'Events', 'Other']
 
 function AuthPage({ onAuth, onLegal }) {
@@ -136,7 +136,7 @@ function AuthPage({ onAuth, onLegal }) {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-5">
       <div className="bg-white rounded-3xl p-8 w-full max-w-md shadow-sm border border-gray-100">
         <div className="text-center mb-6">
-          <div className="text-3xl font-black text-gray-900 tracking-tight mb-1">Wor<span className="text-teal-500">bid</span></div>
+          <div className="text-3xl font-black text-gray-900 tracking-tight mb-1">Yes<span className="text-teal-500">kro</span></div>
           {tab === 'login' && (
           <div className="mt-3 bg-teal-50 rounded-xl p-3 text-xs text-teal-700 text-center leading-relaxed">
           🌍 Buy, sell, hire and offer locally.<br/>Verified people. No middlemen. Free forever.
@@ -364,7 +364,7 @@ function AuthPage({ onAuth, onLegal }) {
           </div>
         )}
       <div className="text-center mt-4 text-xs text-gray-300">
-          By using Worbid you agree to our{' '}
+          By using Yeskro you agree to our{' '}
           <button onClick={() => onLegal('terms')} className="text-teal-400 underline">Terms</button>
           {' '}and{' '}
           <button onClick={() => onLegal('privacy')} className="text-teal-400 underline">Privacy Policy</button>
@@ -454,7 +454,7 @@ function ListingCard({ listing, onProfileClick, currentUser, sentRequestsMap, se
    )}
    <div className="mt-2 flex justify-between items-center">
      <button onClick={() => {
-       const text = `${listing.title} — ${listing.area}, ${listing.city}\n₹${listing.budgetMin}–${listing.budgetMax}\nFind this on Worbid: worbid.vercel.app`
+       const text = `${listing.title} — ${listing.area}, ${listing.city}\n₹${listing.budgetMin}–${listing.budgetMax}\nFind this on Yeskro: Yeskro.in`
        if (navigator.share) {
          navigator.share({ title: listing.title, text })
        } else {
@@ -779,11 +779,11 @@ function ProfilePage({ userId, currentUser, onBack, onOpenRequests, onOpenSentRe
             setUser(updated)
             setEditingProfile(false)
             // Update localStorage if this is the current user
-            const saved = localStorage.getItem('worbid_user')
+            const saved = localStorage.getItem('Yeskro_user')
             if (saved) {
                const localUser = JSON.parse(saved)
               if (localUser.id === updated.id) {
-                localStorage.setItem('worbid_user', JSON.stringify(updated))
+                localStorage.setItem('Yeskro_user', JSON.stringify(updated))
               }
             }
         }}
@@ -963,7 +963,7 @@ function App() {
   })
 
   useEffect(() => {
-    const saved = localStorage.getItem('worbid_user')
+    const saved = localStorage.getItem('Yeskro_user')
     if (saved) {
       const user = JSON.parse(saved)
       setCurrentUser(user)
@@ -1003,14 +1003,14 @@ function App() {
 
   const handleAuth = (user, keepLoggedIn) => {
   setCurrentUser(user)
-  if (keepLoggedIn) localStorage.setItem('worbid_user', JSON.stringify(user))
+  if (keepLoggedIn) localStorage.setItem('Yeskro_user', JSON.stringify(user))
   fetchSentRequests(user.id)
   fetchInboxCount(user.id)
   }
 
   const handleLogout = () => {
     setCurrentUser(null)
-    localStorage.removeItem('worbid_user')
+    localStorage.removeItem('Yeskro_user')
   }
 
   const handleProfileClick = (userId) => { setViewingProfile(userId); setPage('profile') }
@@ -1055,7 +1055,7 @@ function App() {
       <div className="max-w-md mx-auto">
         <div className="bg-white sticky top-0 z-10 border-b border-gray-100">
           <div className="flex justify-between items-center px-5 py-4">
-            <div className="text-2xl font-black text-gray-900 tracking-tight">Wor<span className="text-teal-500">bid</span></div>
+            <div className="text-2xl font-black text-gray-900 tracking-tight">Yes<span className="text-teal-500">kro</span></div>
             <div className="flex items-center gap-2">
               <button onClick={() => setPage('myprofile')} className="text-xs font-semibold text-gray-600 hover:text-teal-600">Hi, {currentUser.name.split(' ')[0]}</button>
               <button onClick={() => setPage('requests')} className="relative p-1">

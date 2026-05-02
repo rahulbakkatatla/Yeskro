@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 
-const API = 'https://worbid.onrender.com'
+const API = 'https://Yeskro.onrender.com'
 
 export default function SentRequests({ currentUser, onBack }) {
   const [requests, setRequests] = useState([])
