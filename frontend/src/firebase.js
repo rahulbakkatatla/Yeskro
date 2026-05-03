@@ -2,7 +2,7 @@ import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDAFospG6iJXJAXZRLcsIOJnGniDziyHQA",
+  apiKey: "AIzaSyBS-7DPn8almqe2vjrbclQ1_jO-hN5T2fY",
   authDomain: "Yeskro.firebaseapp.com",
   projectId: "Yeskro",
   storageBucket: "Yeskro.firebasestorage.app",
