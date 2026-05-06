@@ -37,10 +37,14 @@ function AuthPage({ onAuth, onLegal }) {
     window.recaptchaVerifier = null
   }
   window.recaptchaVerifier = new RecaptchaVerifier(
-    auth,
-    'recaptcha-container',
-    { size: 'invisible', callback: () => {} }
-  )
+  auth,
+  'recaptcha-container',
+  { 
+    size: 'invisible',
+    callback: () => {},
+    sitekey: '6LerTdwsAAAAAJSJ20D-fTaNQMnM4m6eEeE4Woyn'
+  }
+  ) 
   return window.recaptchaVerifier
   }
 
