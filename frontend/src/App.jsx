@@ -155,7 +155,7 @@ function AuthPage({ onAuth, onLegal }) {
           )}
         </div>
 
-        <div id="recaptcha-container"></div>
+        <div id="recaptcha-container" key={tab}></div>
 
         <div className="flex gap-1 bg-gray-100 rounded-xl p-1 mb-6">
           {['login', 'register', 'reset'].map(t => (
