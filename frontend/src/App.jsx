@@ -28,15 +28,20 @@ function AuthPage({ onAuth, onLegal }) {
 
   const clear = () => { setError(null); setSuccess(null) }
   const setupRecaptcha = () => {
+  try {
     if (window.recaptchaVerifier) {
       window.recaptchaVerifier.clear()
       window.recaptchaVerifier = null
     }
-    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-      size: 'invisible',
-      callback: () => {}
-    })
-    return window.recaptchaVerifier
+  } catch (e) {
+    window.recaptchaVerifier = null
+  }
+  window.recaptchaVerifier = new RecaptchaVerifier(
+    auth,
+    'recaptcha-container',
+    { size: 'invisible', callback: () => {} }
+  )
+  return window.recaptchaVerifier
   }
 
   const handleLogin = async () => {
