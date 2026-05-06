@@ -2,14 +2,13 @@ import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDAFospG6iJXJAXZRLcsIOJnGniDziyHQA", 
-  authDomain: "worbid.firebaseapp.com", // This must stay 'worbid'
-  projectId: "worbid",                 // This must stay 'worbid'
-  storageBucket: "worbid.firebasestorage.app",
-  messagingSenderId: "819865730242",
-  appId: "1:819865730242:web:e3193445bc5db0f83e4f5b"
+  apiKey: "AIzaSyCLvdSSOB9kNdSk4Dbt0uYDvwATHjlx5Qo",
+  authDomain: "yeskro-bd480.firebaseapp.com",
+  projectId: "yeskro-bd480",
+  storageBucket: "yeskro-bd480.firebasestorage.app",
+  messagingSenderId: "491879851542",
+  appId: "1:491879851542:web:0e752166b9afc90a61f737"
 }
-
 
 const app = initializeApp(firebaseConfig)
 export const auth = getAuth(app)
