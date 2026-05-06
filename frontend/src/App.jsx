@@ -41,8 +41,7 @@ function AuthPage({ onAuth, onLegal }) {
   'recaptcha-container',
   { 
     size: 'invisible',
-    callback: () => {},
-    sitekey: '6LerTdwsAAAAAJSJ20D-fTaNQMnM4m6eEeE4Woyn'
+    callback: () => {}
   }
   ) 
   return window.recaptchaVerifier
