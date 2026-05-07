@@ -446,8 +446,8 @@ function ListingDetailPage({ listing, currentUser, onBack, sentRequestsMap, setS
   }
   const status = sentRequestsMap?.[listing.id]
   return (
-    <div className="min-h-screen bg-[##FFFCFA]">
-      <div className="max-w-md mx-auto">
+    <div className="min-h-screen bg-[#FFFCFA]">
+      <div className="w-full">
         <div className="bg-[#FFFCFA] border-b border-orange-100 px-5 py-4 flex items-center gap-3 sticky top-0 z-10">
           <button onClick={onBack} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-bold text-sm">←</button>
           <div className="font-bold text-gray-900 flex-1 truncate">{listing.title}</div>
