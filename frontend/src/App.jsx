@@ -1256,21 +1256,9 @@ function App() {
     <div className="min-h-screen bg-[#FFF8F3]">
       <div className="max-w-md mx-auto">
         <div className="bg-white sticky top-0 z-10 border-b border-gray-100">
-          <div className="flex justify-between items-center px-5 py-4">
+         <div className="flex justify-between items-center px-5 py-4">
             <div className="text-2xl font-black text-gray-900 tracking-tight">Yes<span className="text-orange-500">kro</span></div>
-            <div className="flex items-center gap-2">
-              <button onClick={() => setPage('myprofile')} className="text-xs font-semibold text-gray-600 hover:text-orange-600">Hi, {currentUser.name.split(' ')[0]}</button>
-              <button onClick={() => setPage('requests')} className="relative p-1">
-                <span className="text-lg">🔔</span>
-                 {inboxCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center leading-none">
-                  {inboxCount}
-                </span>
-              )}
-              </button>
-            <button onClick={() => setShowModal(true)} className="bg-[#FF6B2B] text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-[#e55a1f]">+ Post</button>
-            <button onClick={handleLogout} className="text-xs text-gray-400 hover:text-gray-600">logout</button>
-            </div>
+            <div className="text-xs text-gray-400">📍 {currentUser.city || 'Hyderabad'}</div>
           </div>
           <div className="px-5 pb-3 flex gap-2">
             <input type="text" placeholder="Search listings..." value={search} onChange={e => setSearch(e.target.value)} className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400"/>
@@ -1279,7 +1267,7 @@ function App() {
             </button>
             </div>          <div className="flex gap-2 px-5 pb-4 overflow-x-auto">{['All',...CATEGORIES].map(cat => <button key={cat} onClick={() => setActivecat(cat)} className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap ${activecat===cat?'bg-[#1A1A1A] text-white':'bg-gray-100 text-gray-500'}`}>{cat}</button>)}</div>
         </div>
-        <div className="px-5 pt-4">
+        <div className="px-5 pt-4 pb-24">
           {successMsg && (
            <div className="bg-green-50 border border-green-200 rounded-2xl p-4 mb-4 text-sm text-green-700 font-medium flex justify-between items-center">
              {successMsg}
@@ -1298,8 +1286,35 @@ function App() {
           {!loading && filtered.map(listing => <ListingCard key={listing.id} listing={listing} onProfileClick={handleProfileClick} currentUser={currentUser} sentRequestsMap={sentRequestsMap} setSentRequestsMap={setSentRequestsMap} onOpenSentRequests={() => setPage('sentrequests')} />)}
         </div>
       </div>
-        {showModal && <PostModal onClose={() => setShowModal(false)} onSuccess={(msg) => { setShowModal(false); fetchListings(); setSuccessMsg(msg) }} currentUser={currentUser} />}
+       {showModal && <PostModal onClose={() => setShowModal(false)} onSuccess={(msg) => { setShowModal(false); fetchListings(); setSuccessMsg(msg) }} currentUser={currentUser} />}
         {showFilters && <FilterModal filters={filters} setFilters={setFilters} onClose={() => setShowFilters(false)} onReset={() => setFilters({ city: '', area: '', type: 'all', minBudget: '', maxBudget: '', timeRange: 'all', sortBy: 'newest', verifiedOnly: false })} />}
+        <div className="fixed bottom-0 left-0 right-0 z-20 flex justify-center">
+          <div className="w-full max-w-md bg-[#1A1A1A] border-t border-[#333] flex items-center justify-around px-2 py-2">
+            <button onClick={() => setPage('feed')} className="flex flex-col items-center gap-0.5 px-3 py-1.5">
+              <span className="text-xl">{page === 'feed' ? '🏠' : '🏠'}</span>
+              <span className={`text-[10px] font-bold ${page === 'feed' ? 'text-[#FF6B2B]' : 'text-gray-500'}`}>Feed</span>
+            </button>
+            <button onClick={() => { setPage('feed'); setTimeout(() => document.querySelector('input[placeholder="Search listings..."]')?.focus(), 100) }} className="flex flex-col items-center gap-0.5 px-3 py-1.5">
+              <span className="text-xl">🔍</span>
+              <span className="text-[10px] font-bold text-gray-500">Search</span>
+            </button>
+            <button onClick={() => setShowModal(true)} className="flex flex-col items-center justify-center w-12 h-12 rounded-full bg-[#FF6B2B] shadow-lg -mt-4">
+              <span className="text-white text-2xl font-bold leading-none">+</span>
+            </button>
+            <button onClick={() => setPage('requests')} className="flex flex-col items-center gap-0.5 px-3 py-1.5 relative">
+              <span className="text-xl">📬</span>
+              {inboxCount > 0 && <span className="absolute top-0 right-2 bg-red-500 text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">{inboxCount}</span>}
+              <span className={`text-[10px] font-bold ${page === 'requests' ? 'text-[#FF6B2B]' : 'text-gray-500'}`}>Inbox</span>
+            </button>
+            <button onClick={() => setPage('myprofile')} className="flex flex-col items-center gap-0.5 px-3 py-1.5">
+              {currentUser?.photoUrl
+                ? <img src={currentUser.photoUrl} className="w-6 h-6 rounded-full object-cover"/>
+                : <span className="text-xl">👤</span>
+              }
+              <span className={`text-[10px] font-bold ${page === 'myprofile' ? 'text-[#FF6B2B]' : 'text-gray-500'}`}>Profile</span>
+            </button>
+          </div>
+        </div>
     </div>
   )
 }
