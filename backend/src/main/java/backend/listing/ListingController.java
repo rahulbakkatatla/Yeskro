@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 import backend.contact.ContactRequestRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 @RestController
 @RequestMapping("/api/listings")
@@ -52,9 +53,11 @@ public class ListingController {
         listing.setCity(updated.getCity());
         listing.setBudgetMin(updated.getBudgetMin());
         listing.setBudgetMax(updated.getBudgetMax());
+        listing.setPhotoUrl(updated.getPhotoUrl());
         return ResponseEntity.ok(listingRepository.save(listing));
     }
 
+    @Transactional
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteListing(@PathVariable Long id) {
         if (!listingRepository.existsById(id)) return ResponseEntity.notFound().build();
