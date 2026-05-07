@@ -29,6 +29,7 @@ public class Listing {
     private String type;
     private String area;
     private String city;
+    private String photoUrl;
     private Double budgetMin;
     private Double budgetMax;
     private Boolean isActive = true;
