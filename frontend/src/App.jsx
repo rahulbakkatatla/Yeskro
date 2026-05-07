@@ -19,7 +19,7 @@ function AuthPage({ onAuth, onLegal }) {
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [keepLoggedIn, setKeepLoggedIn] = useState(true)
-  const [form, setForm] = useState({ name: '', area: '', city: 'Hyderabad', bio: '' })
+  const [form, setForm] = useState({ name: '', area: '', city: 'Hyderabad' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(null)
@@ -252,12 +252,7 @@ function AuthPage({ onAuth, onLegal }) {
                 placeholder="e.g. Hyderabad"
                 className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
             </div>
-            <div className="mb-4">
-              <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Bio (optional)</label>
-              <textarea value={form.bio} onChange={e => setForm({...form, bio: e.target.value})} rows={2}
-                placeholder="Tell people what you can do..."
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 resize-none"/>
-            </div>
+            
             <div className="mb-4">
               <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Email (for notifications)</label>
               <input value={form.email || ''} onChange={e => setForm({...form, email: e.target.value})}
@@ -571,18 +566,48 @@ function EditListingModal({ listing, onClose, onSave }) {
     area: listing.area || '',
     city: listing.city || '',
     budgetMin: listing.budgetMin || '',
-    budgetMax: listing.budgetMax || ''
+    budgetMax: listing.budgetMax || '',
+    photoUrl: listing.photoUrl || ''
   })
   const [loading, setLoading] = useState(false)
+  const [photo, setPhoto] = useState(null)
+  const [photoPreview, setPhotoPreview] = useState(listing.photoUrl || null)
+  const [photoUploading, setPhotoUploading] = useState(false)
   const handle = (e) => setForm({...form, [e.target.name]: e.target.value})
 
+  const handlePhoto = (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    if (!['image/jpeg','image/png','image/webp'].includes(file.type)) { alert('Only JPG, PNG or WebP allowed'); return }
+    if (file.size > 5 * 1024 * 1024) { alert('Photo must be under 5MB'); return }
+    setPhoto(file)
+    setPhotoPreview(URL.createObjectURL(file))
+  }
+
+  const uploadPhoto = async () => {
+    if (!photo) return form.photoUrl || null
+    setPhotoUploading(true)
+    try {
+      const data = new FormData()
+      data.append('file', photo)
+      data.append('upload_preset', 'yeskro_listings')
+      const res = await fetch('https://api.cloudinary.com/v1_1/dbetftxjp/image/upload', { method: 'POST', body: data })
+      const json = await res.json()
+      return json.secure_url
+    } catch { alert('Photo upload failed'); return null }
+    finally { setPhotoUploading(false) }
+  }
+
   const save = async () => {
+    if (!form.budgetMin || parseFloat(form.budgetMin) <= 0) { alert('Min budget is required'); return }
     try {
       setLoading(true)
+      const photoUrl = await uploadPhoto()
       const res = await axios.put(`${API}/api/listings/${listing.id}`, {
         ...form,
         budgetMin: parseFloat(form.budgetMin) || 0,
-        budgetMax: parseFloat(form.budgetMax) || 0
+        budgetMax: parseFloat(form.budgetMax) || 0,
+        photoUrl
       })
       onSave(res.data)
     } catch { alert('Failed to update') }
@@ -608,13 +633,26 @@ function EditListingModal({ listing, onClose, onSave }) {
           <div className="flex gap-2">{['offering','seeking'].map(t => <button key={t} onClick={() => setForm({...form,type:t})} className={`flex-1 py-2 rounded-xl text-sm font-bold capitalize ${form.type===t?'bg-gray-900 text-white':'bg-gray-100 text-gray-500'}`}>{t}</button>)}</div></div>
         <div className="mb-4"><label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Area</label>
           <input name="area" value={form.area} onChange={handle} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/></div>
-        <div className="mb-6"><label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Budget (₹)</label>
+        <div className="mb-4"><label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Photo</label>
+          {photoPreview
+            ? <div className="relative">
+                <img src={photoPreview} className="w-full h-40 object-cover rounded-xl"/>
+                <button onClick={() => { setPhoto(null); setPhotoPreview(null); setForm({...form, photoUrl: ''}) }} className="absolute top-2 right-2 bg-black bg-opacity-50 text-white rounded-full w-6 h-6 text-xs flex items-center justify-center">✕</button>
+              </div>
+            : <label className="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100">
+                <span className="text-2xl mb-1">📷</span>
+                <span className="text-xs text-gray-400">Tap to add a photo</span>
+                <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handlePhoto} className="hidden"/>
+              </label>
+          }
+        </div>
+        <div className="mb-6"><label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Budget (₹) <span className="text-red-400">*</span></label>
           <div className="flex gap-2">
-            <input name="budgetMin" value={form.budgetMin} onChange={handle} placeholder="Min" type="number" className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+            <input name="budgetMin" value={form.budgetMin} onChange={handle} placeholder="Min (required)" type="number" className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
             <input name="budgetMax" value={form.budgetMax} onChange={handle} placeholder="Max" type="number" className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
           </div></div>
-        <button onClick={save} disabled={loading} className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700 disabled:opacity-50">
-          {loading ? 'Saving...' : 'Save changes →'}
+        <button onClick={save} disabled={loading||photoUploading} className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700 disabled:opacity-50">
+          {photoUploading ? 'Uploading photo...' : loading ? 'Saving...' : 'Save changes →'}
         </button>
       </div>
     </div>
@@ -812,9 +850,9 @@ function PostModal({ onClose, onSuccess, currentUser }) {
   const [form, setForm] = useState({ title: '', description: '', category: 'Home Services', type: 'offering', area: currentUser?.area || '', city: currentUser?.city || 'Hyderabad', budgetMin: '', budgetMax: '' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-const [photo, setPhoto] = useState(null)
-const [photoPreview, setPhotoPreview] = useState(null)
-const [photoUploading, setPhotoUploading] = useState(false)
+  const [photo, setPhoto] = useState(null)
+  const [photoPreview, setPhotoPreview] = useState(null)
+  const [photoUploading, setPhotoUploading] = useState(false)
 
 const handlePhoto = (e) => {
   const file = e.target.files[0]
@@ -842,6 +880,7 @@ const uploadPhoto = async () => {
   const submit = async () => {
     if (!form.title.trim()) { setError('Title is required'); return }
     if (!form.area.trim()) { setError('Area is required'); return }
+    if (!form.budgetMin || parseFloat(form.budgetMin) <= 0) { setError('Min budget is required'); return }
     try {
       setLoading(true); setError(null)
       const photoUrl = await uploadPhoto()
