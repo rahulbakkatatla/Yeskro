@@ -161,7 +161,7 @@ function AuthPage({ onAuth, onLegal }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#FFFCFA] flex items-start justify-center px-4 pt-6">
+    <div className="min-h-screen bg-gray-50 flex items-start justify-center px-4 pt-6">
       <div className="bg-[#FFFCFA] rounded-3xl shadow-sm border border-orange-100 p-6 w-full max-w-md">
         <div className="text-center mb-6">
           <div className="text-3xl font-black text-gray-900 tracking-tight mb-1">Yes<span className="text-orange-500">kro</span></div>

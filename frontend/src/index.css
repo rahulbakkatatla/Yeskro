@@ -14,7 +14,7 @@ body {
 
 @media (max-width: 640px) {
   body {
-    background-color: #FFFCFA;
+  background-color: #f9fafb;
   }
   .auth-card {
     border-radius: 16px !important;
