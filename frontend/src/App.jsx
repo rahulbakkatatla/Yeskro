@@ -416,11 +416,15 @@ function ListingCard({ listing, onProfileClick, currentUser, sentRequestsMap, se
       {listing.photoUrl && (
        <img src={listing.photoUrl} alt={listing.title} className="w-full h-40 object-cover rounded-xl mb-3"/>
       )}
+      {listing.availableToday && <span className="inline-block text-xs font-bold bg-green-50 text-green-600 px-2 py-0.5 rounded-full mb-1">🟢 Available today</span>}
       <h3 className="font-bold text-gray-900 mb-1 text-sm leading-tight">{listing.title}</h3>
       <p className="text-xs text-gray-500 mb-3 leading-relaxed">{listing.description}</p>
       <div className="flex justify-between items-center mb-3">
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => listing.user && onProfileClick(listing.user.id)}>
-          <div className="w-7 h-7 rounded-lg bg-teal-500 flex items-center justify-center text-white text-xs font-bold">{initials}</div>
+      {listing.user?.photoUrl
+      ? <img src={listing.user.photoUrl} className="w-7 h-7 rounded-lg object-cover"/>
+      : <div className="w-7 h-7 rounded-lg bg-teal-500 flex items-center justify-center text-white text-xs font-bold">{initials}</div>
+      }
           <div>
             <div className="text-xs font-semibold text-gray-700 hover:text-teal-600">
               {listing.user?.name || 'Anonymous'}
@@ -460,15 +464,16 @@ function ListingCard({ listing, onProfileClick, currentUser, sentRequestsMap, se
     </>
    )}
    <div className="mt-2 flex justify-between items-center">
-     <button onClick={() => {
-       const text = `${listing.title} — ${listing.area}, ${listing.city}\n₹${listing.budgetMin}–${listing.budgetMax}\nFind this on Yeskro: Yeskro.in`
-       if (navigator.share) {
-         navigator.share({ title: listing.title, text })
-       } else {
-         navigator.clipboard.writeText(text)
-         alert('Copied to clipboard!')
-       }
-     }} className="text-xs text-gray-400 hover:text-teal-600">🔗 Share</button>
+     <div className="flex gap-3">
+  <button onClick={() => {
+    const text = encodeURIComponent(`${listing.title} — ${listing.area}, ${listing.city}\n₹${listing.budgetMin}–${listing.budgetMax}\nFind this on Yeskro: https://yeskro.in`)
+    window.open(`https://wa.me/?text=${text}`)
+  }} className="text-xs text-gray-400 hover:text-green-500">📲 WhatsApp</button>
+  <button onClick={() => {
+    navigator.clipboard.writeText(`${listing.title} — ${listing.area}, ${listing.city}\n₹${listing.budgetMin}–${listing.budgetMax}\nhttps://yeskro.in`)
+    alert('Copied!')
+  }} className="text-xs text-gray-400 hover:text-teal-600">🔗 Copy</button>
+</div>
      {!isOwn && (
        <button onClick={() => window.open(`mailto:rahulbhaktala@gmail.com?subject=Report Listing&body=Listing ID: ${listing.id}%0ATitle: ${listing.title}%0APosted by: ${listing.user?.name}%0AReason: `)}
          className="text-xs text-gray-300 hover:text-red-400">🚩 Report</button>
@@ -651,6 +656,16 @@ function EditListingModal({ listing, onClose, onSave }) {
             <input name="budgetMin" value={form.budgetMin} onChange={handle} placeholder="Min (required)" type="number" className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
             <input name="budgetMax" value={form.budgetMax} onChange={handle} placeholder="Max" type="number" className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
           </div></div>
+          <div className="mb-4 flex items-center justify-between bg-teal-50 rounded-xl px-4 py-3">
+  <div>
+    <div className="text-sm font-bold text-teal-800">Available today</div>
+    <div className="text-xs text-teal-600">Let buyers know you're free right now</div>
+  </div>
+  <button onClick={() => setForm({...form, availableToday: !form.availableToday})}
+    className={`w-12 h-6 rounded-full transition-all ${form.availableToday ? 'bg-teal-500' : 'bg-gray-200'}`}>
+    <div className={`w-5 h-5 bg-white rounded-full shadow transition-all mx-0.5 ${form.availableToday ? 'translate-x-6' : 'translate-x-0'}`}/>
+  </button>
+</div>
         <button onClick={save} disabled={loading||photoUploading} className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700 disabled:opacity-50">
           {photoUploading ? 'Uploading photo...' : loading ? 'Saving...' : 'Save changes →'}
         </button>
@@ -668,12 +683,39 @@ function EditProfileModal({ user, onClose, onSave }) {
     email: user.email || ''
   })
   const [loading, setLoading] = useState(false)
-  const handle = (e) => setForm({...form, [e.target.name]: e.target.value})
+const [photo, setPhoto] = useState(null)
+const [photoPreview, setPhotoPreview] = useState(user.photoUrl || null)
+const [photoUploading, setPhotoUploading] = useState(false)
+const handle = (e) => setForm({...form, [e.target.name]: e.target.value})
+
+const handlePhoto = (e) => {
+  const file = e.target.files[0]
+  if (!file) return
+  if (!['image/jpeg','image/png','image/webp'].includes(file.type)) { alert('Only JPG, PNG or WebP allowed'); return }
+  if (file.size > 5 * 1024 * 1024) { alert('Photo must be under 5MB'); return }
+  setPhoto(file)
+  setPhotoPreview(URL.createObjectURL(file))
+}
+
+const uploadPhoto = async () => {
+  if (!photo) return user.photoUrl || null
+  setPhotoUploading(true)
+  try {
+    const data = new FormData()
+    data.append('file', photo)
+    data.append('upload_preset', 'yeskro_listings')
+    const res = await fetch('https://api.cloudinary.com/v1_1/dbetftxjp/image/upload', { method: 'POST', body: data })
+    const json = await res.json()
+    return json.secure_url
+  } catch { alert('Photo upload failed'); return null }
+  finally { setPhotoUploading(false) }
+}
 
   const save = async () => {
     try {
       setLoading(true)
-      const res = await axios.put(`${API}/api/users/profile`, { ...user, ...form })
+      const photoUrl = await uploadPhoto()
+      const res = await axios.put(`${API}/api/users/profile`, { ...user, ...form, photoUrl })
       onSave(res.data)
     } catch { alert('Failed to update profile') }
     finally { setLoading(false) }
@@ -686,6 +728,19 @@ function EditProfileModal({ user, onClose, onSave }) {
           <div className="text-xl font-black text-gray-900">Edit profile</div>
           <button onClick={onClose} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold">✕</button>
         </div>
+        <div className="mb-6 flex flex-col items-center">
+  <div className="relative">
+    {photoPreview
+      ? <img src={photoPreview} className="w-24 h-24 rounded-full object-cover border-4 border-teal-100"/>
+      : <div className="w-24 h-24 rounded-full bg-teal-500 flex items-center justify-center text-white text-2xl font-bold border-4 border-teal-100">{user.name?.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase()}</div>
+    }
+    <label className="absolute bottom-0 right-0 bg-gray-900 rounded-full w-8 h-8 flex items-center justify-center cursor-pointer hover:bg-gray-700">
+      <span className="text-white text-xs">📷</span>
+      <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handlePhoto} className="hidden"/>
+    </label>
+  </div>
+  {photoPreview && photo && <button onClick={() => { setPhoto(null); setPhotoPreview(user.photoUrl || null) }} className="text-xs text-gray-400 mt-2 hover:text-red-400">Remove photo</button>}
+</div>
         <div className="mb-4">
           <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Full name</label>
           <input name="name" value={form.name} onChange={handle} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
@@ -707,7 +762,7 @@ function EditProfileModal({ user, onClose, onSave }) {
           <input name="email" value={form.email} onChange={handle} placeholder="your@email.com" type="email" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
         </div>
         <button onClick={save} disabled={loading} className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700 disabled:opacity-50">
-          {loading ? 'Saving...' : 'Save profile →'}
+          {photoUploading ? 'Uploading photo...' : loading ? 'Saving...' : 'Save profile →'}
         </button>
       </div>
     </div>
@@ -753,7 +808,10 @@ function ProfilePage({ userId, currentUser, onBack, onOpenRequests, onOpenSentRe
         </div>
         <div className="bg-white mx-5 mt-5 rounded-2xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-start gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-teal-500 flex items-center justify-center text-white text-xl font-bold">{initials}</div>
+          {user?.photoUrl
+           ? <img src={user.photoUrl} className="w-16 h-16 rounded-2xl object-cover border-2 border-teal-100"/>
+          : <div className="w-16 h-16 rounded-2xl bg-teal-500 flex items-center justify-center text-white text-xl font-bold">{initials}</div>
+          }
             <div className="flex-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="font-black text-gray-900 text-lg">{user?.name}</h2>
@@ -847,7 +905,7 @@ function ProfilePage({ userId, currentUser, onBack, onOpenRequests, onOpenSentRe
     
 
 function PostModal({ onClose, onSuccess, currentUser }) {
-  const [form, setForm] = useState({ title: '', description: '', category: 'Home Services', type: 'offering', area: currentUser?.area || '', city: currentUser?.city || 'Hyderabad', budgetMin: '', budgetMax: '' })
+  const [form, setForm] = useState({ title: '', description: '', category: 'Home Services', type: 'offering', area: currentUser?.area || '', city: currentUser?.city || 'Hyderabad', budgetMin: '', budgetMax: '', availableToday: false })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [photo, setPhoto] = useState(null)

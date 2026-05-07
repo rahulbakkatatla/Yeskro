@@ -54,6 +54,7 @@ public class ListingController {
         listing.setBudgetMin(updated.getBudgetMin());
         listing.setBudgetMax(updated.getBudgetMax());
         listing.setPhotoUrl(updated.getPhotoUrl());
+        listing.setAvailableToday(updated.getAvailableToday());
         return ResponseEntity.ok(listingRepository.save(listing));
     }
 
