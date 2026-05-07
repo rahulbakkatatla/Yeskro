@@ -418,6 +418,9 @@ function ListingCard({ listing, onProfileClick, currentUser, sentRequestsMap, se
            <span className="text-xs text-gray-300">{timeAgo(listing.createdAt)}</span>
         </div>
       </div>
+      {listing.photoUrl && (
+       <img src={listing.photoUrl} alt={listing.title} className="w-full h-40 object-cover rounded-xl mb-3"/>
+      )}
       <h3 className="font-bold text-gray-900 mb-1 text-sm leading-tight">{listing.title}</h3>
       <p className="text-xs text-gray-500 mb-3 leading-relaxed">{listing.description}</p>
       <div className="flex justify-between items-center mb-3">
@@ -809,13 +812,40 @@ function PostModal({ onClose, onSuccess, currentUser }) {
   const [form, setForm] = useState({ title: '', description: '', category: 'Home Services', type: 'offering', area: currentUser?.area || '', city: currentUser?.city || 'Hyderabad', budgetMin: '', budgetMax: '' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+const [photo, setPhoto] = useState(null)
+const [photoPreview, setPhotoPreview] = useState(null)
+const [photoUploading, setPhotoUploading] = useState(false)
+
+const handlePhoto = (e) => {
+  const file = e.target.files[0]
+  if (!file) return
+  if (!['image/jpeg','image/png','image/webp'].includes(file.type)) { setError('Only JPG, PNG or WebP allowed'); return }
+  if (file.size > 5 * 1024 * 1024) { setError('Photo must be under 5MB'); return }
+  setPhoto(file)
+  setPhotoPreview(URL.createObjectURL(file))
+}
+
+const uploadPhoto = async () => {
+  if (!photo) return null
+  setPhotoUploading(true)
+  try {
+    const data = new FormData()
+    data.append('file', photo)
+    data.append('upload_preset', 'yeskro_listings')
+    const res = await fetch('https://api.cloudinary.com/v1_1/dbetftxjp/image/upload', { method: 'POST', body: data })
+    const json = await res.json()
+    return json.secure_url
+  } catch { setError('Photo upload failed'); return null }
+  finally { setPhotoUploading(false) }
+}
   const handle = (e) => setForm({...form, [e.target.name]: e.target.value})
   const submit = async () => {
     if (!form.title.trim()) { setError('Title is required'); return }
     if (!form.area.trim()) { setError('Area is required'); return }
     try {
       setLoading(true); setError(null)
-      await axios.post(`${API}/api/listings`, { ...form, budgetMin: parseFloat(form.budgetMin)||0, budgetMax: parseFloat(form.budgetMax)||0, user: { id: currentUser.id } })
+      const photoUrl = await uploadPhoto()
+      await axios.post(`${API}/api/listings`, { ...form, budgetMin: parseFloat(form.budgetMin)||0, budgetMax: parseFloat(form.budgetMax)||0, user: { id: currentUser.id }, photoUrl })
       mixpanel.track('Listing Posted', { category: form.category, type: form.type })
       onSuccess('Listing posted successfully! 🎉')
     } catch { setError('Failed to post.') }
@@ -838,13 +868,27 @@ function PostModal({ onClose, onSuccess, currentUser }) {
         </div>
         <div className="mb-4"><label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Description</label><textarea name="description" value={form.description} onChange={handle} rows={3} placeholder="Describe what you can do..." className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 resize-none"/></div>
         <div className="mb-4"><label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Your area</label><input name="area" value={form.area} onChange={handle} placeholder="e.g. Banjara Hills" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/></div>
+        <div className="mb-4">
+          <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Photo (optional)</label>
+          {photoPreview
+          ? <div className="relative">
+              <img src={photoPreview} className="w-full h-40 object-cover rounded-xl"/>
+              <button onClick={() => { setPhoto(null); setPhotoPreview(null) }} className="absolute top-2 right-2 bg-black bg-opacity-50 text-white rounded-full w-6 h-6 text-xs flex items-center justify-center">✕</button>
+          </div>
+        : <label className="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100">
+            <span className="text-2xl mb-1">📷</span>
+            <span className="text-xs text-gray-400">Tap to add a photo</span>
+            <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handlePhoto} className="hidden"/>
+          </label>
+          }
+        </div>
         <div className="mb-6"><label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Budget (₹)</label>
           <div className="flex gap-2">
             <input name="budgetMin" value={form.budgetMin} onChange={handle} placeholder="Min" type="number" className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
             <input name="budgetMax" value={form.budgetMax} onChange={handle} placeholder="Max" type="number" className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
           </div>
         </div>
-        <button onClick={submit} disabled={loading} className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700 disabled:opacity-50">{loading?'Posting...':'Post listing →'}</button>
+        <button onClick={submit} disabled={loading||photoUploading} className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700 disabled:opacity-50">{photoUploading?'Uploading photo...':loading?'Posting...':'Post listing →'}</button>
       </div>
     </div>
   )
