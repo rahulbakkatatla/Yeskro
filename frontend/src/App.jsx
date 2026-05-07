@@ -161,8 +161,8 @@ function AuthPage({ onAuth, onLegal }) {
   }
 
   return (
-    <div className="bg-[#FFF8F3] min-h-screen px-4 pt-6 pb-6">
-      <div className="bg-[#FFFCFA] rounded-3xl p-6 w-full shadow-sm border border-orange-100">
+    <div className="min-h-screen bg-[#FFF8F3] flex items-center justify-center px-5">
+      <div className="auth-card bg-[#FFFCFA] rounded-3xl p-6 w-full shadow-sm border border-orange-100">
         <div className="text-center mb-6">
           <div className="text-3xl font-black text-gray-900 tracking-tight mb-1">Yes<span className="text-orange-500">kro</span></div>
           {tab === 'login' && (

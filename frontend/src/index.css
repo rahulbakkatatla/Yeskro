@@ -11,3 +11,11 @@
 body {
   background-color: #FFF8F3;
 }
+@media (max-width: 640px) {
+  .auth-card {
+    border-radius: 0 !important;
+    border: none !important;
+    min-height: 100vh;
+    box-shadow: none !important;
+  }
+}
