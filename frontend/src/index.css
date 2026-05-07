@@ -12,13 +12,16 @@ body {
   background-color: #f9fafb;
 }
 
-@media (max-width: 640px) {
-  body {
-  background-color: #f9fafb;
+@media (max-width: 480px) {
+  .auth-wrapper {
+    align-items: stretch !important;
+    padding: 0 !important;
   }
   .auth-card {
-    border-radius: 16px !important;
-    margin-top: 16px;
-    margin-bottom: 16px;
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    min-height: 100vh;
+    padding: 40px 24px !important;
   }
 }
