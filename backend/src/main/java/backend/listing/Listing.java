@@ -1,4 +1,10 @@
-package backend;
+package backend.listing;
+
+import backend.user.User;
+
+import backend.user.User;
+
+import backend.user.User;
 
 import jakarta.persistence.*;
 import lombok.Data;

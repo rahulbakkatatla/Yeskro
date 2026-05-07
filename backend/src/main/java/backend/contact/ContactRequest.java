@@ -1,4 +1,13 @@
-package backend;
+package backend.contact;
+
+import backend.user.User;
+import backend.listing.Listing;
+
+import backend.user.User;
+import backend.listing.Listing;
+
+import backend.user.User;
+import backend.listing.Listing;
 
 import jakarta.persistence.*;
 import lombok.Data;

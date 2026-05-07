@@ -1,4 +1,10 @@
-package backend;
+package backend.listing;
+
+import backend.user.UserRepository;
+
+import backend.user.UserRepository;
+
+import backend.user.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

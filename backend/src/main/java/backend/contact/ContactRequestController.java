@@ -1,4 +1,22 @@
-package backend;
+package backend.contact;
+
+import backend.user.User;
+import backend.listing.Listing;
+import backend.user.UserRepository;
+import backend.listing.ListingRepository;
+import backend.email.EmailService;
+
+import backend.user.UserRepository;
+import backend.listing.ListingRepository;
+import backend.email.EmailService;
+
+import backend.user.UserRepository;
+import backend.listing.ListingRepository;
+import backend.email.EmailService;
+
+import backend.user.UserRepository;
+import backend.listing.ListingRepository;
+import backend.email.EmailService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

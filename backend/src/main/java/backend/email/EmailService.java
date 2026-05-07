@@ -1,4 +1,4 @@
-package backend;
+package backend.email;
 
 import com.resend.Resend;
 import com.resend.core.exception.ResendException;
