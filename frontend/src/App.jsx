@@ -430,7 +430,76 @@ function AuthPage({ onAuth, onLegal }) {
   )
 }
 
-function ListingCard({ listing, onProfileClick, currentUser, sentRequestsMap, setSentRequestsMap, onOpenSentRequests }) {
+function ListingDetailPage({ listing, currentUser, onBack, sentRequestsMap, setSentRequestsMap, onOpenSentRequests }) {
+  const isOwn = currentUser?.id === listing.user?.id
+  const initials = listing.user?.name ? listing.user.name.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase() : '??'
+  const handleRequestContact = async () => {
+    if (!currentUser) return
+    try {
+      await axios.post(`${API}/api/listings/${listing.id}/request-contact?requesterId=${currentUser.id}`)
+      setSentRequestsMap(prev => ({...prev, [listing.id]: 'pending'}))
+    } catch { setSentRequestsMap(prev => ({...prev, [listing.id]: 'pending'})) }
+  }
+  const status = sentRequestsMap?.[listing.id]
+  return (
+    <div className="min-h-screen bg-[#FFF8F3]">
+      <div className="max-w-md mx-auto">
+        <div className="bg-[#FFFCFA] border-b border-orange-100 px-5 py-4 flex items-center gap-3 sticky top-0 z-10">
+          <button onClick={onBack} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-bold text-sm">←</button>
+          <div className="font-bold text-gray-900 flex-1 truncate">{listing.title}</div>
+        </div>
+        {listing.photoUrl && (
+        <div className="w-full bg-black flex items-center justify-center">
+          <img src={listing.photoUrl} alt={listing.title} className="w-full max-h-96 object-contain"/>
+       </div>
+        )}
+        <div className="p-5">
+          <div className="bg-[#FFFCFA] rounded-2xl border border-orange-100 p-5 mb-4">
+            <div className="flex justify-between items-start mb-3">
+              <span className="text-xs font-bold px-2 py-1 rounded-lg bg-orange-50 text-orange-700">{listing.category}</span>
+              <div className="flex flex-col items-end gap-1">
+                <span className="text-xs text-gray-400 capitalize">{listing.type}</span>
+                {listing.availableToday && <span className="text-xs font-bold bg-green-50 text-green-600 px-2 py-0.5 rounded-full">🟢 Available today</span>}
+              </div>
+            </div>
+            <h1 className="text-xl font-black text-gray-900 mb-2">{listing.title}</h1>
+            <p className="text-sm text-gray-500 leading-relaxed mb-4">{listing.description}</p>
+            <div className="flex justify-between items-center">
+              <div className="text-xs text-gray-400">📍 {listing.area}, {listing.city}</div>
+              <div className="text-2xl font-black text-gray-900">{listing.budgetMin > 0 && listing.budgetMax > 0 ? `₹${listing.budgetMin}–${listing.budgetMax}` : listing.budgetMin > 0 ? `₹+` : "Negotiable"}</div>
+            </div>
+          </div>
+          <div className="bg-[#FFFCFA] rounded-2xl border border-orange-100 p-4 mb-4 flex items-center gap-3 cursor-pointer" onClick={() => listing.user && onBack()}>
+            {listing.user?.photoUrl
+              ? <img src={listing.user.photoUrl} className="w-12 h-12 rounded-xl object-cover"/>
+              : <div className="w-12 h-12 rounded-xl bg-orange-500 flex items-center justify-center text-white font-bold">{initials}</div>
+            }
+            <div className="flex-1">
+              <div className="font-bold text-gray-900">{listing.user?.name}</div>
+              <div className="text-xs text-gray-400">{listing.user?.area}, {listing.user?.city}</div>
+            </div>
+            <span className="text-gray-400 text-sm">→</span>
+          </div>
+          {!isOwn && (
+            <div>
+              {!status && <button onClick={handleRequestContact} className="w-full py-4 rounded-2xl text-sm font-bold bg-[#1A1A1A] text-white hover:bg-[#333]">🤝 Connect with {listing.user?.name?.split(' ')[0]}</button>}
+              {status === 'pending' && <button disabled className="w-full py-4 rounded-2xl text-sm font-bold bg-orange-50 text-orange-500 border border-orange-200">⏳ Request Pending</button>}
+              {status === 'approved' && <button onClick={onOpenSentRequests} className="w-full py-4 rounded-2xl text-sm font-bold bg-green-50 text-green-600 border border-green-200">📞 View Contact Number</button>}
+              {status === 'rejected' && <button disabled className="w-full py-4 rounded-2xl text-sm font-bold bg-gray-50 text-gray-400 border border-gray-200">Request Declined</button>}
+            </div>
+          )}
+          <button onClick={() => {
+            const text = `*${listing.title}*\n${listing.description}\n📍 ${listing.area}, ${listing.city}\n💰 ₹${listing.budgetMin}–${listing.budgetMax}\n\nFind on Yeskro 👉 https://yeskro.in/#listing/${listing.id}`
+            if (navigator.share) navigator.share({ title: listing.title, text })
+            else { navigator.clipboard.writeText(text); alert('Copied!') }
+          }} className="w-full mt-3 py-3 rounded-2xl text-sm font-semibold bg-orange-50 text-orange-600 border border-orange-200">📲 Share listing</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ListingCard({ listing, onProfileClick, onListingClick, currentUser, sentRequestsMap, setSentRequestsMap, onOpenSentRequests }) {
   const [requesting, setRequesting] = useState(false)
   const status = sentRequestsMap?.[listing.id]
   const timeAgo = (dateStr) => {
@@ -457,7 +526,7 @@ function ListingCard({ listing, onProfileClick, currentUser, sentRequestsMap, se
   finally { setRequesting(false) }
 }
   return (
-    <div className="bg-[#FFFCFA] rounded-2xl p-4 mb-3 shadow-sm border border-orange-100 hover:border-orange-300 hover:shadow-md transition-all">
+    <div onClick={() => onListingClick && onListingClick(listing)} className="bg-[#FFFCFA] rounded-2xl p-4 mb-3 shadow-sm border border-orange-100 hover:border-orange-300 hover:shadow-md transition-all cursor-pointer">
       <div className="flex justify-between items-start mb-2">
         <span className="text-xs font-bold px-2 py-1 rounded-lg bg-orange-50 text-orange-700">{listing.category}</span>
         <div className="flex flex-col items-end gap-1">
@@ -485,7 +554,7 @@ function ListingCard({ listing, onProfileClick, currentUser, sentRequestsMap, se
             <div className="text-xs text-gray-400">{listing.area}</div>
           </div>
         </div>
-        <div className="text-sm font-bold text-gray-900">₹{listing.budgetMin}–{listing.budgetMax}</div>
+        <div className="text-sm font-bold text-gray-900">{listing.budgetMin > 0 && listing.budgetMax > 0 ? `₹${listing.budgetMin}–${listing.budgetMax}` : listing.budgetMin > 0 ? `₹${listing.budgetMin}+` : "Negotiable"}</div>
       </div>
       {!isOwn && (
         <>
@@ -891,7 +960,7 @@ function ProfilePage({ userId, currentUser, onBack, onOpenRequests, onOpenSentRe
     <h3 className="font-bold text-gray-900 mb-1 text-sm">{listing.title}</h3>
     <p className="text-xs text-gray-500 mb-2">{listing.description}</p>
     <div className="flex justify-between items-center mt-2">
-      <div className="text-sm font-bold text-gray-900">₹{listing.budgetMin}–{listing.budgetMax}</div>
+      <div className="text-sm font-bold text-gray-900">{listing.budgetMin > 0 && listing.budgetMax > 0 ? `₹${listing.budgetMin}–${listing.budgetMax}` : listing.budgetMin > 0 ? `₹+` : "Negotiable"}</div>
       {isOwnProfile && (
         <div className="flex gap-2">
           <button onClick={() => setEditingListing(listing)}
@@ -1148,11 +1217,18 @@ function App() {
   const [currentUser, setCurrentUser] = useState(null)
   const [viewingProfile, setViewingProfile] = useState(null)
   const [page, setPage] = useState('feed')
+  const [viewingListing, setViewingListing] = useState(null)
   const [successMsg, setSuccessMsg] = useState(null)
   const [sentRequestsMap, setSentRequestsMap] = useState({})
   const [inboxCount, setInboxCount] = useState(0)
   const [legalPage, setLegalPage] = useState(null)
   const [showFilters, setShowFilters] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 40)
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
   const [filters, setFilters] = useState({
   city: '',
   area: '',
@@ -1247,6 +1323,7 @@ function App() {
   if (legalPage === 'terms') return <TermsPage onBack={() => setLegalPage(null)} />
   if (legalPage === 'privacy') return <PrivacyPage onBack={() => setLegalPage(null)} />
   if (!currentUser) return <AuthPage onAuth={handleAuth} onLegal={setLegalPage} />
+  if (page === 'listing' && viewingListing) return <ListingDetailPage listing={viewingListing} currentUser={currentUser} onBack={() => { setPage('feed'); setViewingListing(null) }} sentRequestsMap={sentRequestsMap} setSentRequestsMap={setSentRequestsMap} onOpenSentRequests={() => setPage('sentrequests')} />
   if (page === 'requests') return <RequestsInbox currentUser={currentUser} onBack={() => setPage('feed')} />
   if (page === 'sentrequests') return <SentRequests currentUser={currentUser} onBack={() => setPage('feed')} />
   if (page === 'profile' && viewingProfile) return <ProfilePage userId={viewingProfile} currentUser={currentUser} onBack={() => setPage('feed')} onOpenRequests={() => setPage('requests')} onOpenSentRequests={() => setPage('sentrequests')} onLogout={handleLogout} />
@@ -1255,12 +1332,12 @@ function App() {
   return (
     <div className="min-h-screen bg-[#FFF8F3]">
       <div className="max-w-md mx-auto">
-        <div className="bg-white sticky top-0 z-10 border-b border-gray-100">
-         <div className="flex justify-between items-center px-5 py-4">
+        <div className="bg-[#FFFCFA] sticky top-0 z-10 border-b border-orange-100">
+         <div className="flex justify-between items-center px-5 py-2">
             <div className="text-2xl font-black text-gray-900 tracking-tight">Yes<span className="text-orange-500">kro</span></div>
             <div className="text-xs text-gray-400">📍 {currentUser.city || 'Hyderabad'}</div>
           </div>
-          <div className="px-5 pb-3 flex gap-2">
+          <div className={`px-5 pb-3 flex gap-2 transition-all duration-300 ${scrolled ? 'hidden' : ''}`}>
             <input type="text" placeholder="Search listings..." value={search} onChange={e => setSearch(e.target.value)} className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400"/>
             <button onClick={() => setShowFilters(true)} className={`px-4 py-3 rounded-xl text-sm font-bold border ${Object.values(filters).some(v => v && v !== 'all' && v !== 'newest' && v !== false) ? 'bg-orange-500 text-white border-orange-500' : 'bg-gray-50 text-gray-600 border-gray-200'}`}>
               ⚙️
@@ -1283,35 +1360,35 @@ function App() {
           {loading && <div className="text-center py-16 text-gray-400"><div className="text-3xl mb-3">⟳</div><div className="text-sm">Loading...</div></div>}
           {error && <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-center"><div className="text-red-600 text-sm">{error}</div><button onClick={fetchListings} className="mt-2 text-xs text-red-400 underline">Try again</button></div>}
           {!loading && !error && filtered.length === 0 && <div className="text-center py-16 text-gray-400"><div className="text-3xl mb-3">🔍</div><div className="text-sm">No listings found</div></div>}
-          {!loading && filtered.map(listing => <ListingCard key={listing.id} listing={listing} onProfileClick={handleProfileClick} currentUser={currentUser} sentRequestsMap={sentRequestsMap} setSentRequestsMap={setSentRequestsMap} onOpenSentRequests={() => setPage('sentrequests')} />)}
+          {!loading && filtered.map(listing => <ListingCard key={listing.id} listing={listing} onProfileClick={handleProfileClick} onListingClick={(l) => { setViewingListing(l); setPage('listing') }} currentUser={currentUser} sentRequestsMap={sentRequestsMap} setSentRequestsMap={setSentRequestsMap} onOpenSentRequests={() => setPage('sentrequests')} />)}
         </div>
       </div>
        {showModal && <PostModal onClose={() => setShowModal(false)} onSuccess={(msg) => { setShowModal(false); fetchListings(); setSuccessMsg(msg) }} currentUser={currentUser} />}
         {showFilters && <FilterModal filters={filters} setFilters={setFilters} onClose={() => setShowFilters(false)} onReset={() => setFilters({ city: '', area: '', type: 'all', minBudget: '', maxBudget: '', timeRange: 'all', sortBy: 'newest', verifiedOnly: false })} />}
         <div className="fixed bottom-0 left-0 right-0 z-20 flex justify-center">
-          <div className="w-full max-w-md bg-[#1A1A1A] border-t border-[#333] flex items-center justify-around px-2 py-2">
+          <div className="w-full max-w-md bg-[#1A1A1A] border-t border-[#333] flex items-center justify-around px-2 py-0.5">
             <button onClick={() => setPage('feed')} className="flex flex-col items-center gap-0.5 px-3 py-1.5">
               <span className="text-xl">{page === 'feed' ? '🏠' : '🏠'}</span>
-              <span className={`text-[10px] font-bold ${page === 'feed' ? 'text-[#FF6B2B]' : 'text-gray-500'}`}>Feed</span>
+              <span className={`text-[9px] font-bold ${page === 'feed' ? 'text-[#FF6B2B]' : 'text-gray-500'}`}>Feed</span>
             </button>
             <button onClick={() => { setPage('feed'); setTimeout(() => document.querySelector('input[placeholder="Search listings..."]')?.focus(), 100) }} className="flex flex-col items-center gap-0.5 px-3 py-1.5">
               <span className="text-xl">🔍</span>
-              <span className="text-[10px] font-bold text-gray-500">Search</span>
+              <span className="text-[9px] font-bold text-gray-500">Search</span>
             </button>
-            <button onClick={() => setShowModal(true)} className="flex flex-col items-center justify-center w-12 h-12 rounded-full bg-[#FF6B2B] shadow-lg -mt-4">
+            <button onClick={() => setShowModal(true)} className="flex flex-col items-center justify-center w-10 h-10 rounded-full bg-[#FF6B2B] shadow-lg -mt-3">
               <span className="text-white text-2xl font-bold leading-none">+</span>
             </button>
             <button onClick={() => setPage('requests')} className="flex flex-col items-center gap-0.5 px-3 py-1.5 relative">
               <span className="text-xl">📬</span>
               {inboxCount > 0 && <span className="absolute top-0 right-2 bg-red-500 text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">{inboxCount}</span>}
-              <span className={`text-[10px] font-bold ${page === 'requests' ? 'text-[#FF6B2B]' : 'text-gray-500'}`}>Inbox</span>
+              <span className={`text-[9px] font-bold ${page === 'requests' ? 'text-[#FF6B2B]' : 'text-gray-500'}`}>Inbox</span>
             </button>
             <button onClick={() => setPage('myprofile')} className="flex flex-col items-center gap-0.5 px-3 py-1.5">
               {currentUser?.photoUrl
                 ? <img src={currentUser.photoUrl} className="w-6 h-6 rounded-full object-cover"/>
                 : <span className="text-xl">👤</span>
               }
-              <span className={`text-[10px] font-bold ${page === 'myprofile' ? 'text-[#FF6B2B]' : 'text-gray-500'}`}>Profile</span>
+              <span className={`text-[9px] font-bold ${page === 'myprofile' ? 'text-[#FF6B2B]' : 'text-gray-500'}`}>Profile</span>
             </button>
           </div>
         </div>
