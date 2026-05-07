@@ -1,1 +1,13 @@
 @import "tailwindcss";
+
+:root {
+  --saffron: #FF6B2B;
+  --saffron-light: #FFF0E8;
+  --saffron-pale: #FFF8F3;
+  --saffron-border: #FFD4B8;
+  --off-black: #1A1A1A;
+}
+
+body {
+  background-color: #FFF8F3;
+}

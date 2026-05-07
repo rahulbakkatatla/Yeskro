@@ -161,17 +161,17 @@ function AuthPage({ onAuth, onLegal }) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-5">
-      <div className="bg-white rounded-3xl p-8 w-full max-w-md shadow-sm border border-gray-100">
+    <div className="min-h-screen bg-[#FFF8F3] flex items-center justify-center px-5">
+      <div className="bg-[#FFFCFA] rounded-3xl p-8 w-full max-w-md shadow-sm border border-gray-100">
         <div className="text-center mb-6">
-          <div className="text-3xl font-black text-gray-900 tracking-tight mb-1">Yes<span className="text-teal-500">kro</span></div>
+          <div className="text-3xl font-black text-gray-900 tracking-tight mb-1">Yes<span className="text-orange-500">kro</span></div>
           {tab === 'login' && (
-          <div className="mt-3 bg-teal-50 rounded-xl p-3 text-xs text-teal-700 text-center leading-relaxed">
+          <div className="mt-3 bg-orange-50 rounded-xl p-3 text-xs text-orange-700 text-center leading-relaxed">
           🌍 Buy, sell, hire and offer locally.<br/>Verified people. No middlemen. Free forever.
           </div>
           )}
           {tab === 'register' && (
-          <div className="mt-3 bg-teal-50 rounded-xl p-3 text-xs text-teal-700 text-center leading-relaxed">
+          <div className="mt-3 bg-orange-50 rounded-xl p-3 text-xs text-orange-700 text-center leading-relaxed">
           Your local marketplace for anything.<br/>Sell items, offer services, find help nearby. Free.
           </div>
           )}
@@ -205,28 +205,28 @@ function AuthPage({ onAuth, onLegal }) {
                     '--PhoneInputCountryFlag-height': '1em',
                     '--PhoneInput-color--focus': '#14b8a6'
                 }}
-                className="flex w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 gap-2"/>
+                className="flex w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400 gap-2"/>
             </div>
             <div className="mb-4">
               <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Password</label>
               <input value={password} onChange={e => { setPassword(e.target.value); clear() }}
                 onKeyDown={e => e.key === 'Enter' && handleLogin()}
                 placeholder="Your password" type="password"
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400"/>
             </div>
             <div className="flex items-center gap-2 mb-6">
-              <input type="checkbox" id="keep" checked={keepLoggedIn} onChange={e => setKeepLoggedIn(e.target.checked)} className="w-4 h-4 accent-teal-500"/>
+              <input type="checkbox" id="keep" checked={keepLoggedIn} onChange={e => setKeepLoggedIn(e.target.checked)} className="w-4 h-4 accent-orange-500"/>
               <label htmlFor="keep" className="text-xs text-gray-500 cursor-pointer">Keep me logged in</label>
             </div>
             <button onClick={handleLogin} disabled={loading}
-              className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700 disabled:opacity-50">
+              className="w-full bg-[#1A1A1A] text-white py-4 rounded-xl font-bold text-sm hover:bg-[#333333] disabled:opacity-50">
               {loading ? 'Logging in...' : 'Login →'}
             </button>
             <div className="text-center mt-3 text-xs text-gray-400">
-              Don't have an account? <button onClick={() => switchTab('register')} className="text-teal-600 font-semibold">Register</button>
+              Don't have an account? <button onClick={() => switchTab('register')} className="text-orange-600 font-semibold">Register</button>
             </div>
             <div className="text-center mt-2 text-xs text-gray-400">
-              Forgot password? <button onClick={() => switchTab('reset')} className="text-teal-600 font-semibold">Reset here</button>
+              Forgot password? <button onClick={() => switchTab('reset')} className="text-orange-600 font-semibold">Reset here</button>
             </div>
           </>
         )}
@@ -245,31 +245,31 @@ function AuthPage({ onAuth, onLegal }) {
                 '--PhoneInputCountryFlag-height': '1em',
                 '--PhoneInput-color--focus': '#14b8a6'
                 }}
-        className="flex w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 gap-2"/>
+        className="flex w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400 gap-2"/>
             </div>
             <div className="mb-4">
               <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Password</label>
               <input value={password} onChange={e => { setPassword(e.target.value); clear() }}
                 placeholder="Min 6 characters" type="password"
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400"/>
             </div>
             <div className="mb-4">
               <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Full name</label>
               <input value={form.name} onChange={e => { setForm({...form, name: e.target.value}); clear() }}
                 placeholder="e.g. Rahul Yadav"
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400"/>
             </div>
             <div className="mb-4">
               <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Your area</label>
               <input value={form.area} onChange={e => { setForm({...form, area: e.target.value}); clear() }}
                 placeholder="e.g. Banjara Hills"
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400"/>
             </div>
             <div className="mb-4">
               <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">City</label>
               <input value={form.city} onChange={e => setForm({...form, city: e.target.value})}
                 placeholder="e.g. Hyderabad"
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400"/>
             </div>
             
             <div className="mb-4">
@@ -277,18 +277,18 @@ function AuthPage({ onAuth, onLegal }) {
               <input value={form.email || ''} onChange={e => setForm({...form, email: e.target.value})}
               placeholder="your@email.com (optional)"
               type="email"
-              className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+              className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400"/>
             </div>
             <div className="flex items-center gap-2 mb-6">
-              <input type="checkbox" id="keep2" checked={keepLoggedIn} onChange={e => setKeepLoggedIn(e.target.checked)} className="w-4 h-4 accent-teal-500"/>
+              <input type="checkbox" id="keep2" checked={keepLoggedIn} onChange={e => setKeepLoggedIn(e.target.checked)} className="w-4 h-4 accent-orange-500"/>
               <label htmlFor="keep2" className="text-xs text-gray-500 cursor-pointer">Keep me logged in</label>
             </div>
             <button onClick={() => handleSendOtp('register')} disabled={loading}
-              className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700 disabled:opacity-50">
+              className="w-full bg-[#1A1A1A] text-white py-4 rounded-xl font-bold text-sm hover:bg-[#333333] disabled:opacity-50">
               {loading ? 'Sending OTP...' : 'Send OTP →'}
             </button>
             <div className="text-center mt-3 text-xs text-gray-400">
-              Already have an account? <button onClick={() => switchTab('login')} className="text-teal-600 font-semibold">Login</button>
+              Already have an account? <button onClick={() => switchTab('login')} className="text-orange-600 font-semibold">Login</button>
             </div>
           </>
         )}
@@ -299,13 +299,13 @@ function AuthPage({ onAuth, onLegal }) {
               <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Enter OTP sent to +91{phone}</label>
               <input value={otp} onChange={e => { setOtp(e.target.value); clear() }}
                 placeholder="6 digit OTP" type="tel" maxLength={6} autoComplete="off"
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 tracking-widest font-bold text-center text-lg"/>
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400 tracking-widest font-bold text-center text-lg"/>
             </div>
             <button onClick={() => handleVerifyOtp('register')} disabled={loading}
-              className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700 disabled:opacity-50">
+              className="w-full bg-[#1A1A1A] text-white py-4 rounded-xl font-bold text-sm hover:bg-[#333333] disabled:opacity-50">
               {loading ? 'Verifying...' : 'Verify & Create Account →'}
             </button>
-            <button onClick={() => handleSendOtp('register')} className="w-full mt-3 py-2 text-xs text-teal-600">Resend OTP</button>
+            <button onClick={() => handleSendOtp('register')} className="w-full mt-3 py-2 text-xs text-orange-600">Resend OTP</button>
             <button onClick={() => { setStep('form'); clear() }} className="w-full mt-1 py-2 text-xs text-gray-400">← Change details</button>
           </>
         )}
@@ -318,10 +318,10 @@ function AuthPage({ onAuth, onLegal }) {
             <div className="flex flex-col items-center mb-6">
               <div className="relative mb-3">
                 {profilePhotoPreview
-                  ? <img src={profilePhotoPreview} className="w-24 h-24 rounded-full object-cover border-4 border-teal-100"/>
-                  : <div className="w-24 h-24 rounded-full bg-teal-100 flex items-center justify-center text-4xl">👤</div>
+                  ? <img src={profilePhotoPreview} className="w-24 h-24 rounded-full object-cover border-4 border-orange-100"/>
+                  : <div className="w-24 h-24 rounded-full bg-orange-100 flex items-center justify-center text-4xl">👤</div>
                 }
-                <label className="absolute bottom-0 right-0 bg-gray-900 rounded-full w-8 h-8 flex items-center justify-center cursor-pointer hover:bg-gray-700">
+                <label className="absolute bottom-0 right-0 bg-[#1A1A1A] rounded-full w-8 h-8 flex items-center justify-center cursor-pointer hover:bg-[#333333]">
                   <span className="text-white text-xs">📷</span>
                   <input type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => {
                     const file = e.target.files[0]
@@ -334,7 +334,7 @@ function AuthPage({ onAuth, onLegal }) {
               </div>
             </div>
             {error && <div className="bg-red-50 border border-red-200 rounded-xl p-3 mb-4 text-sm text-red-600">{error}</div>}
-            <button onClick={handleCompleteRegister} disabled={loading} className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700 disabled:opacity-50 mb-3">
+            <button onClick={handleCompleteRegister} disabled={loading} className="w-full bg-[#1A1A1A] text-white py-4 rounded-xl font-bold text-sm hover:bg-[#333333] disabled:opacity-50 mb-3">
               {loading ? 'Creating account...' : 'Continue →'}
             </button>
             <button onClick={handleCompleteRegister} disabled={loading} className="w-full bg-gray-50 text-gray-500 py-3 rounded-xl font-semibold text-sm hover:bg-gray-100">
@@ -357,14 +357,14 @@ function AuthPage({ onAuth, onLegal }) {
                  '--PhoneInputCountryFlag-height': '1em',
                  '--PhoneInput-color--focus': '#14b8a6'
                 }}
-                className="flex w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 gap-2"/>
+                className="flex w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400 gap-2"/>
             </div>
             <button onClick={() => handleSendOtp('reset')} disabled={loading}
-              className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700 disabled:opacity-50">
+              className="w-full bg-[#1A1A1A] text-white py-4 rounded-xl font-bold text-sm hover:bg-[#333333] disabled:opacity-50">
               {loading ? 'Sending OTP...' : 'Send OTP →'}
             </button>
             <div className="text-center mt-3 text-xs text-gray-400">
-              Remember it? <button onClick={() => switchTab('login')} className="text-teal-600 font-semibold">Back to login</button>
+              Remember it? <button onClick={() => switchTab('login')} className="text-orange-600 font-semibold">Back to login</button>
             </div>
           </>
         )}
@@ -375,34 +375,34 @@ function AuthPage({ onAuth, onLegal }) {
               <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Enter OTP sent to +91{phone}</label>
               <input value={otp} onChange={e => { setOtp(e.target.value); clear() }}
                 placeholder="6 digit OTP" type="tel" maxLength={6} autoComplete="off"
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 tracking-widest font-bold text-center text-lg"/>
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400 tracking-widest font-bold text-center text-lg"/>
             </div>
             <button onClick={() => handleVerifyOtp('reset')} disabled={loading}
-              className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700 disabled:opacity-50">
+              className="w-full bg-[#1A1A1A] text-white py-4 rounded-xl font-bold text-sm hover:bg-[#333333] disabled:opacity-50">
               {loading ? 'Verifying...' : 'Verify OTP →'}
             </button>
-            <button onClick={() => handleSendOtp('reset')} className="w-full mt-3 py-2 text-xs text-teal-600">Resend OTP</button>
+            <button onClick={() => handleSendOtp('reset')} className="w-full mt-3 py-2 text-xs text-orange-600">Resend OTP</button>
             <button onClick={() => { setStep('form'); clear() }} className="w-full mt-1 py-2 text-xs text-gray-400">← Change number</button>
           </>
         )}
 
         {tab === 'reset' && step === 'newpassword' && (
           <>
-            <div className="bg-teal-50 rounded-xl p-3 mb-4 text-xs text-teal-700 font-medium">✓ OTP verified. Set your new password.</div>
+            <div className="bg-orange-50 rounded-xl p-3 mb-4 text-xs text-orange-700 font-medium">✓ OTP verified. Set your new password.</div>
             <div className="mb-4">
               <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">New password</label>
               <input value={newPassword} onChange={e => { setNewPassword(e.target.value); clear() }}
                 placeholder="Min 6 characters" type="password"
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400"/>
             </div>
             <div className="mb-6">
               <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Confirm password</label>
               <input value={confirmPassword} onChange={e => { setConfirmPassword(e.target.value); clear() }}
                 placeholder="Repeat your password" type="password"
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400"/>
             </div>
             <button onClick={handleReset} disabled={loading}
-              className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700 disabled:opacity-50">
+              className="w-full bg-[#1A1A1A] text-white py-4 rounded-xl font-bold text-sm hover:bg-[#333333] disabled:opacity-50">
               {loading ? 'Resetting...' : 'Reset password →'}
             </button>
           </>
@@ -414,16 +414,16 @@ function AuthPage({ onAuth, onLegal }) {
             <div className="font-bold text-gray-900 mb-2">Password reset!</div>
             <div className="text-sm text-gray-500 mb-6">Login with your new password.</div>
             <button onClick={() => switchTab('login')}
-              className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700">
+              className="w-full bg-[#1A1A1A] text-white py-4 rounded-xl font-bold text-sm hover:bg-[#333333]">
               Go to login →
             </button>
           </div>
         )}
       <div className="text-center mt-4 text-xs text-gray-300">
           By using Yeskro you agree to our{' '}
-          <button onClick={() => onLegal('terms')} className="text-teal-400 underline">Terms</button>
+          <button onClick={() => onLegal('terms')} className="text-orange-400 underline">Terms</button>
           {' '}and{' '}
-          <button onClick={() => onLegal('privacy')} className="text-teal-400 underline">Privacy Policy</button>
+          <button onClick={() => onLegal('privacy')} className="text-orange-400 underline">Privacy Policy</button>
         </div>
       </div>
     </div>
@@ -457,9 +457,9 @@ function ListingCard({ listing, onProfileClick, currentUser, sentRequestsMap, se
   finally { setRequesting(false) }
 }
   return (
-    <div className="bg-white rounded-2xl p-4 mb-3 shadow-sm border border-gray-100 hover:border-teal-300 hover:shadow-md transition-all">
+    <div className="bg-[#FFFCFA] rounded-2xl p-4 mb-3 shadow-sm border border-orange-100 hover:border-orange-300 hover:shadow-md transition-all">
       <div className="flex justify-between items-start mb-2">
-        <span className="text-xs font-bold px-2 py-1 rounded-lg bg-teal-50 text-teal-700">{listing.category}</span>
+        <span className="text-xs font-bold px-2 py-1 rounded-lg bg-orange-50 text-orange-700">{listing.category}</span>
         <div className="flex flex-col items-end gap-1">
           <span className="text-xs text-gray-400 capitalize">{listing.type}</span>
            <span className="text-xs text-gray-300">{timeAgo(listing.createdAt)}</span>
@@ -475,12 +475,12 @@ function ListingCard({ listing, onProfileClick, currentUser, sentRequestsMap, se
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => listing.user && onProfileClick(listing.user.id)}>
       {listing.user?.photoUrl
       ? <img src={listing.user.photoUrl} className="w-7 h-7 rounded-lg object-cover"/>
-      : <div className="w-7 h-7 rounded-lg bg-teal-500 flex items-center justify-center text-white text-xs font-bold">{initials}</div>
+      : <div className="w-7 h-7 rounded-lg bg-orange-500 flex items-center justify-center text-white text-xs font-bold">{initials}</div>
       }
           <div>
-            <div className="text-xs font-semibold text-gray-700 hover:text-teal-600">
+            <div className="text-xs font-semibold text-gray-700 hover:text-orange-600">
               {listing.user?.name || 'Anonymous'}
-              {listing.user?.isVerified && <span className="text-teal-500 ml-1">✓</span>}
+              {listing.user?.isVerified && <span className="text-orange-500 ml-1">✓</span>}
             </div>
             <div className="text-xs text-gray-400">{listing.area}</div>
           </div>
@@ -491,7 +491,7 @@ function ListingCard({ listing, onProfileClick, currentUser, sentRequestsMap, se
         <>
           {!status && (
             <button onClick={handleRequestContact} disabled={requesting}
-            className="w-full py-2.5 rounded-xl text-sm font-bold bg-gray-900 text-white hover:bg-gray-700 transition-all">
+            className="w-full py-2.5 rounded-xl text-sm font-bold bg-[#1A1A1A] text-white hover:bg-[#333333] transition-all">
         {requesting ? 'Sending...' : '🤝 Connect'}
       </button>
        )}
@@ -561,9 +561,9 @@ function RequestsInbox({ currentUser, onBack }) {
   const approved = requests.filter(r => r.status === 'approved')
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#FFF8F3]">
       <div className="max-w-md mx-auto">
-        <div className="bg-white border-b border-gray-100 px-5 py-4 flex items-center gap-3">
+        <div className="bg-[#FFFCFA] border-b border-orange-100 px-5 py-4 flex items-center gap-3">
           <button onClick={onBack} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-bold text-sm">←</button>
           <div className="font-bold text-gray-900">Connect Requests</div>
           {pending.length > 0 && <span className="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{pending.length}</span>}
@@ -574,9 +574,9 @@ function RequestsInbox({ currentUser, onBack }) {
           {pending.length > 0 && <>
             <div className="text-xs font-bold uppercase tracking-widest text-orange-500 mb-3">Waiting — {pending.length}</div>
             {pending.map(req => (
-              <div key={req.id} className="bg-white rounded-2xl p-4 mb-3 border border-orange-200 shadow-sm">
+              <div key={req.id} className="bg-[#FFFCFA] rounded-2xl p-4 mb-3 border border-orange-200 shadow-sm">
                 <div className="flex items-start gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-teal-500 flex items-center justify-center text-white text-sm font-bold">
+                  <div className="w-10 h-10 rounded-xl bg-orange-500 flex items-center justify-center text-white text-sm font-bold">
                     {req.requester?.name?.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase()}
                   </div>
                   <div className="flex-1">
@@ -586,7 +586,7 @@ function RequestsInbox({ currentUser, onBack }) {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={() => handleApprove(req.id)} className="flex-1 bg-teal-500 text-white text-sm font-bold py-2.5 rounded-xl hover:bg-teal-600">✓ Approve</button>
+                  <button onClick={() => handleApprove(req.id)} className="flex-1 bg-orange-500 text-white text-sm font-bold py-2.5 rounded-xl hover:bg-orange-600">✓ Approve</button>
                   <button onClick={() => handleReject(req.id)} className="bg-gray-100 text-gray-600 text-sm font-bold px-4 py-2.5 rounded-xl">✕</button>
                 </div>
               </div>
@@ -595,9 +595,9 @@ function RequestsInbox({ currentUser, onBack }) {
           {approved.length > 0 && <>
             <div className="text-xs font-bold uppercase tracking-widest text-green-600 mb-3 mt-4">Approved — {approved.length}</div>
             {approved.map(req => (
-              <div key={req.id} className="bg-white rounded-2xl p-4 mb-3 border border-green-200 shadow-sm">
+              <div key={req.id} className="bg-[#FFFCFA] rounded-2xl p-4 mb-3 border border-green-200 shadow-sm">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-teal-500 flex items-center justify-center text-white text-sm font-bold">
+                  <div className="w-10 h-10 rounded-xl bg-orange-500 flex items-center justify-center text-white text-sm font-bold">
                     {req.requester?.name?.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase()}
                   </div>
                   <div className="flex-1">
@@ -679,17 +679,17 @@ function EditListingModal({ listing, onClose, onSave }) {
           <button onClick={onClose} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold">✕</button>
         </div>
         <div className="mb-4"><label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Title</label>
-          <input name="title" value={form.title} onChange={handle} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/></div>
+          <input name="title" value={form.title} onChange={handle} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400"/></div>
         <div className="mb-4"><label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Description</label>
-          <textarea name="description" value={form.description} onChange={handle} rows={3} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 resize-none"/></div>
+          <textarea name="description" value={form.description} onChange={handle} rows={3} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400 resize-none"/></div>
         <div className="mb-4"><label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Category</label>
-          <select name="category" value={form.category} onChange={handle} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400">
+          <select name="category" value={form.category} onChange={handle} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400">
             {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
           </select></div>
         <div className="mb-4"><label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Type</label>
-          <div className="flex gap-2">{['offering','seeking'].map(t => <button key={t} onClick={() => setForm({...form,type:t})} className={`flex-1 py-2 rounded-xl text-sm font-bold capitalize ${form.type===t?'bg-gray-900 text-white':'bg-gray-100 text-gray-500'}`}>{t}</button>)}</div></div>
+          <div className="flex gap-2">{['offering','seeking'].map(t => <button key={t} onClick={() => setForm({...form,type:t})} className={`flex-1 py-2 rounded-xl text-sm font-bold capitalize ${form.type===t?'bg-[#1A1A1A] text-white':'bg-gray-100 text-gray-500'}`}>{t}</button>)}</div></div>
         <div className="mb-4"><label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Area</label>
-          <input name="area" value={form.area} onChange={handle} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/></div>
+          <input name="area" value={form.area} onChange={handle} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400"/></div>
         <div className="mb-4"><label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Photo</label>
           {photoPreview
             ? <div className="relative">
@@ -705,20 +705,20 @@ function EditListingModal({ listing, onClose, onSave }) {
         </div>
         <div className="mb-6"><label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Budget (₹) <span className="text-red-400">*</span></label>
           <div className="flex gap-2">
-            <input name="budgetMin" value={form.budgetMin} onChange={handle} placeholder="Min (required)" type="number" className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
-            <input name="budgetMax" value={form.budgetMax} onChange={handle} placeholder="Max" type="number" className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+            <input name="budgetMin" value={form.budgetMin} onChange={handle} placeholder="Min (required)" type="number" className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400"/>
+            <input name="budgetMax" value={form.budgetMax} onChange={handle} placeholder="Max" type="number" className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400"/>
           </div></div>
-          <div className="mb-4 flex items-center justify-between bg-teal-50 rounded-xl px-4 py-3">
+          <div className="mb-4 flex items-center justify-between bg-orange-50 rounded-xl px-4 py-3">
   <div>
-    <div className="text-sm font-bold text-teal-800">Available today</div>
-    <div className="text-xs text-teal-600">Let buyers know you're free right now</div>
+    <div className="text-sm font-bold text-orange-800">Available today</div>
+    <div className="text-xs text-orange-600">Let buyers know you're free right now</div>
   </div>
   <button onClick={() => setForm({...form, availableToday: !form.availableToday})}
-    className={`w-12 h-6 rounded-full transition-all ${form.availableToday ? 'bg-teal-500' : 'bg-gray-200'}`}>
+    className={`w-12 h-6 rounded-full transition-all ${form.availableToday ? 'bg-orange-500' : 'bg-gray-200'}`}>
     <div className={`w-5 h-5 bg-white rounded-full shadow transition-all mx-0.5 ${form.availableToday ? 'translate-x-6' : 'translate-x-0'}`}/>
   </button>
 </div>
-        <button onClick={save} disabled={loading||photoUploading} className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700 disabled:opacity-50">
+        <button onClick={save} disabled={loading||photoUploading} className="w-full bg-[#1A1A1A] text-white py-4 rounded-xl font-bold text-sm hover:bg-[#333333] disabled:opacity-50">
           {photoUploading ? 'Uploading photo...' : loading ? 'Saving...' : 'Save changes →'}
         </button>
       </div>
@@ -783,10 +783,10 @@ const uploadPhoto = async () => {
         <div className="mb-6 flex flex-col items-center">
   <div className="relative">
     {photoPreview
-      ? <img src={photoPreview} className="w-24 h-24 rounded-full object-cover border-4 border-teal-100"/>
-      : <div className="w-24 h-24 rounded-full bg-teal-500 flex items-center justify-center text-white text-2xl font-bold border-4 border-teal-100">{user.name?.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase()}</div>
+      ? <img src={photoPreview} className="w-24 h-24 rounded-full object-cover border-4 border-orange-100"/>
+      : <div className="w-24 h-24 rounded-full bg-orange-500 flex items-center justify-center text-white text-2xl font-bold border-4 border-orange-100">{user.name?.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase()}</div>
     }
-    <label className="absolute bottom-0 right-0 bg-gray-900 rounded-full w-8 h-8 flex items-center justify-center cursor-pointer hover:bg-gray-700">
+    <label className="absolute bottom-0 right-0 bg-[#1A1A1A] rounded-full w-8 h-8 flex items-center justify-center cursor-pointer hover:bg-[#333333]">
       <span className="text-white text-xs">📷</span>
       <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handlePhoto} className="hidden"/>
     </label>
@@ -795,25 +795,25 @@ const uploadPhoto = async () => {
 </div>
         <div className="mb-4">
           <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Full name</label>
-          <input name="name" value={form.name} onChange={handle} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+          <input name="name" value={form.name} onChange={handle} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400"/>
         </div>
         <div className="mb-4">
           <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Area</label>
-          <input name="area" value={form.area} onChange={handle} placeholder="e.g. Banjara Hills" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+          <input name="area" value={form.area} onChange={handle} placeholder="e.g. Banjara Hills" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400"/>
         </div>
         <div className="mb-4">
           <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">City</label>
-          <input name="city" value={form.city} onChange={handle} placeholder="e.g. Hyderabad" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+          <input name="city" value={form.city} onChange={handle} placeholder="e.g. Hyderabad" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400"/>
         </div>
         <div className="mb-4">
           <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Bio</label>
-          <textarea name="bio" value={form.bio} onChange={handle} rows={3} placeholder="Tell people what you can do..." className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 resize-none"/>
+          <textarea name="bio" value={form.bio} onChange={handle} rows={3} placeholder="Tell people what you can do..." className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400 resize-none"/>
         </div>
         <div className="mb-6">
           <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Email (for notifications)</label>
-          <input name="email" value={form.email} onChange={handle} placeholder="your@email.com" type="email" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+          <input name="email" value={form.email} onChange={handle} placeholder="your@email.com" type="email" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400"/>
         </div>
-        <button onClick={save} disabled={loading} className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700 disabled:opacity-50">
+        <button onClick={save} disabled={loading} className="w-full bg-[#1A1A1A] text-white py-4 rounded-xl font-bold text-sm hover:bg-[#333333] disabled:opacity-50">
           {photoUploading ? 'Uploading photo...' : loading ? 'Saving...' : 'Save profile →'}
         </button>
       </div>
@@ -841,18 +841,18 @@ function ProfilePage({ userId, currentUser, onBack, onOpenRequests, onOpenSentRe
   const isOwnProfile = currentUser?.id === userId
   const joinedDate = user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }) : ''
 
-  if (loading) return <div className="min-h-screen bg-gray-50 flex items-center justify-center"><div className="text-gray-400 text-sm">Loading...</div></div>
+  if (loading) return <div className="min-h-screen bg-[#FFF8F3] flex items-center justify-center"><div className="text-gray-400 text-sm">Loading...</div></div>
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#FFF8F3]">
       <div className="max-w-md mx-auto">
-        <div className="bg-white border-b border-gray-100 px-5 py-4 flex items-center gap-3">
+        <div className="bg-[#FFFCFA] border-b border-orange-100 px-5 py-4 flex items-center gap-3">
           <button onClick={onBack} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-bold text-sm">←</button>
           <div className="font-bold text-gray-900">Profile</div>
           {isOwnProfile && (
             <div className="ml-auto flex gap-2">
             <button onClick={() => setEditingProfile(true)} className="text-xs font-semibold bg-gray-100 text-gray-600 px-3 py-1.5 rounded-xl">✏️ Edit</button>
-            <button onClick={onOpenSentRequests} className="text-xs font-semibold bg-teal-50 text-teal-600 px-3 py-1.5 rounded-xl">🤝 Sent</button>
+            <button onClick={onOpenSentRequests} className="text-xs font-semibold bg-orange-50 text-orange-600 px-3 py-1.5 rounded-xl">🤝 Sent</button>
             <button onClick={onOpenRequests} className="text-xs font-semibold bg-orange-50 text-orange-600 px-3 py-1.5 rounded-xl">📬 Inbox</button>
             <button onClick={onLogout} className="text-xs font-semibold bg-red-50 text-red-500 px-3 py-1.5 rounded-xl">Logout</button>
           </div>
@@ -861,13 +861,13 @@ function ProfilePage({ userId, currentUser, onBack, onOpenRequests, onOpenSentRe
         <div className="bg-white mx-5 mt-5 rounded-2xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-start gap-4">
           {user?.photoUrl
-           ? <img src={user.photoUrl} className="w-16 h-16 rounded-2xl object-cover border-2 border-teal-100"/>
-          : <div className="w-16 h-16 rounded-2xl bg-teal-500 flex items-center justify-center text-white text-xl font-bold">{initials}</div>
+           ? <img src={user.photoUrl} className="w-16 h-16 rounded-2xl object-cover border-2 border-orange-100"/>
+          : <div className="w-16 h-16 rounded-2xl bg-orange-500 flex items-center justify-center text-white text-xl font-bold">{initials}</div>
           }
             <div className="flex-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="font-black text-gray-900 text-lg">{user?.name}</h2>
-                {user?.isVerified && <span className="text-xs font-bold bg-teal-50 text-teal-700 px-2 py-0.5 rounded-full">✓</span>}
+                {user?.isVerified && <span className="text-xs font-bold bg-orange-50 text-orange-700 px-2 py-0.5 rounded-full">✓</span>}
               </div>
               <div className="text-xs text-gray-500 mt-1">{user?.area}{user?.city ? `, ${user.city}` : ''}</div>
               {joinedDate && <div className="text-xs text-gray-400 mt-1">Member since {joinedDate}</div>}
@@ -876,16 +876,16 @@ function ProfilePage({ userId, currentUser, onBack, onOpenRequests, onOpenSentRe
           {user?.bio && <div className="mt-4 pt-4 border-t border-gray-100"><p className="text-sm text-gray-600">{user.bio}</p></div>}
           <div className="mt-4 pt-4 border-t border-gray-100 flex gap-4">
             <div className="text-center"><div className="text-xl font-black text-gray-900">{listings.length}</div><div className="text-xs text-gray-400">Listings</div></div>
-            <div className="text-center"><div className="text-xl font-black text-teal-600">{listings.filter(l => l.type === 'offering').length}</div><div className="text-xs text-gray-400">Offering</div></div>
+            <div className="text-center"><div className="text-xl font-black text-orange-600">{listings.filter(l => l.type === 'offering').length}</div><div className="text-xs text-gray-400">Offering</div></div>
             <div className="text-center"><div className="text-xl font-black text-amber-500">{listings.filter(l => l.type === 'seeking').length}</div><div className="text-xs text-gray-400">Seeking</div></div>
           </div>
         </div>
         <div className="px-5 mt-5">
           <div className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">{listings.length > 0 ? `${listings.length} listings` : 'No listings yet'}</div>
           {listings.map(listing => (
-  <div key={listing.id} className="bg-white rounded-2xl p-4 mb-3 shadow-sm border border-gray-100">
+  <div key={listing.id} className="bg-[#FFFCFA] rounded-2xl p-4 mb-3 shadow-sm border border-gray-100">
     <div className="flex justify-between items-start mb-2">
-      <span className="text-xs font-bold px-2 py-1 rounded-lg bg-teal-50 text-teal-700">{listing.category}</span>
+      <span className="text-xs font-bold px-2 py-1 rounded-lg bg-orange-50 text-orange-700">{listing.category}</span>
       <span className="text-xs text-gray-400 capitalize">{listing.type}</span>
     </div>
     <h3 className="font-bold text-gray-900 mb-1 text-sm">{listing.title}</h3>
@@ -895,7 +895,7 @@ function ProfilePage({ userId, currentUser, onBack, onOpenRequests, onOpenSentRe
       {isOwnProfile && (
         <div className="flex gap-2">
           <button onClick={() => setEditingListing(listing)}
-            className="text-xs font-semibold text-teal-600 bg-teal-50 px-3 py-1.5 rounded-xl hover:bg-teal-100">
+            className="text-xs font-semibold text-orange-600 bg-orange-50 px-3 py-1.5 rounded-xl hover:bg-orange-100">
             ✏️ Edit
           </button>
           <button onClick={async () => {
@@ -1009,14 +1009,14 @@ const uploadPhoto = async () => {
         </div>
         {error && <div className="bg-red-50 border border-red-200 rounded-xl p-3 mb-4 text-sm text-red-600">{error}</div>}
         <div className="mb-4"><label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">I am</label>
-          <div className="flex gap-2">{['offering','seeking'].map(t => <button key={t} onClick={() => setForm({...form,type:t})} className={`flex-1 py-3 rounded-xl text-sm font-bold capitalize ${form.type===t?'bg-gray-900 text-white':'bg-gray-100 text-gray-500'}`}>{t==='offering'?'🙋 Offering':'🤝 Seeking'}</button>)}</div>
+          <div className="flex gap-2">{['offering','seeking'].map(t => <button key={t} onClick={() => setForm({...form,type:t})} className={`flex-1 py-3 rounded-xl text-sm font-bold capitalize ${form.type===t?'bg-[#1A1A1A] text-white':'bg-gray-100 text-gray-500'}`}>{t==='offering'?'🙋 Offering':'🤝 Seeking'}</button>)}</div>
         </div>
-        <div className="mb-4"><label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Title</label><input name="title" value={form.title} onChange={handle} placeholder="e.g. Available for car cleaning today" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/></div>
+        <div className="mb-4"><label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Title</label><input name="title" value={form.title} onChange={handle} placeholder="e.g. Available for car cleaning today" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400"/></div>
         <div className="mb-4"><label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Category</label>
-          <div className="grid grid-cols-2 gap-2">{CATEGORIES.map(cat => <button key={cat} onClick={() => setForm({...form,category:cat})} className={`py-2 px-3 rounded-xl text-xs font-semibold text-left ${form.category===cat?'bg-teal-500 text-white':'bg-gray-50 text-gray-500'}`}>{cat}</button>)}</div>
+          <div className="grid grid-cols-2 gap-2">{CATEGORIES.map(cat => <button key={cat} onClick={() => setForm({...form,category:cat})} className={`py-2 px-3 rounded-xl text-xs font-semibold text-left ${form.category===cat?'bg-orange-500 text-white':'bg-gray-50 text-gray-500'}`}>{cat}</button>)}</div>
         </div>
-        <div className="mb-4"><label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Description</label><textarea name="description" value={form.description} onChange={handle} rows={3} placeholder="Describe what you can do..." className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400 resize-none"/></div>
-        <div className="mb-4"><label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Your area</label><input name="area" value={form.area} onChange={handle} placeholder="e.g. Banjara Hills" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/></div>
+        <div className="mb-4"><label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Description</label><textarea name="description" value={form.description} onChange={handle} rows={3} placeholder="Describe what you can do..." className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400 resize-none"/></div>
+        <div className="mb-4"><label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Your area</label><input name="area" value={form.area} onChange={handle} placeholder="e.g. Banjara Hills" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400"/></div>
         <div className="mb-4">
           <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Photo (optional)</label>
           {photoPreview
@@ -1033,11 +1033,11 @@ const uploadPhoto = async () => {
         </div>
         <div className="mb-6"><label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Budget (₹)</label>
           <div className="flex gap-2">
-            <input name="budgetMin" value={form.budgetMin} onChange={handle} placeholder="Min" type="number" className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
-            <input name="budgetMax" value={form.budgetMax} onChange={handle} placeholder="Max" type="number" className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+            <input name="budgetMin" value={form.budgetMin} onChange={handle} placeholder="Min" type="number" className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400"/>
+            <input name="budgetMax" value={form.budgetMax} onChange={handle} placeholder="Max" type="number" className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400"/>
           </div>
         </div>
-        <button onClick={submit} disabled={loading||photoUploading} className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700 disabled:opacity-50">{photoUploading?'Uploading photo...':loading?'Posting...':'Post listing →'}</button>
+        <button onClick={submit} disabled={loading||photoUploading} className="w-full bg-[#1A1A1A] text-white py-4 rounded-xl font-bold text-sm hover:bg-[#333333] disabled:opacity-50">{photoUploading?'Uploading photo...':loading?'Posting...':'Post listing →'}</button>
       </div>
     </div>
   )
@@ -1062,14 +1062,14 @@ function FilterModal({ filters, setFilters, onClose, onReset }) {
           <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">City</label>
           <input value={local.city} onChange={e => handle('city', e.target.value)}
             placeholder="e.g. Mumbai, Hyderabad, Delhi"
-            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400"/>
         </div>
 
         <div className="mb-5">
           <label className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Area</label>
           <input value={local.area} onChange={e => handle('area', e.target.value)}
             placeholder="e.g. Banjara Hills, Andheri"
-            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400"/>
         </div>
 
         <div className="mb-5">
@@ -1077,7 +1077,7 @@ function FilterModal({ filters, setFilters, onClose, onReset }) {
           <div className="flex gap-2">
             {[['all', 'All'], ['offering', '🙋 Offering'], ['seeking', '🤝 Seeking']].map(([val, label]) => (
               <button key={val} onClick={() => handle('type', val)}
-                className={`flex-1 py-2.5 rounded-xl text-xs font-bold ${local.type === val ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500'}`}>
+                className={`flex-1 py-2.5 rounded-xl text-xs font-bold ${local.type === val ? 'bg-[#1A1A1A] text-white' : 'bg-gray-100 text-gray-500'}`}>
                 {label}
               </button>
             ))}
@@ -1089,10 +1089,10 @@ function FilterModal({ filters, setFilters, onClose, onReset }) {
           <div className="flex gap-2">
             <input value={local.minBudget} onChange={e => handle('minBudget', e.target.value)}
               placeholder="Min" type="number"
-              className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+              className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400"/>
             <input value={local.maxBudget} onChange={e => handle('maxBudget', e.target.value)}
               placeholder="Max" type="number"
-              className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
+              className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400"/>
           </div>
         </div>
 
@@ -1101,7 +1101,7 @@ function FilterModal({ filters, setFilters, onClose, onReset }) {
           <div className="flex gap-2">
             {[['all', 'Any time'], ['today', 'Today'], ['week', 'This week'], ['month', 'This month']].map(([val, label]) => (
               <button key={val} onClick={() => handle('timeRange', val)}
-                className={`flex-1 py-2 rounded-xl text-xs font-bold ${local.timeRange === val ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500'}`}>
+                className={`flex-1 py-2 rounded-xl text-xs font-bold ${local.timeRange === val ? 'bg-[#1A1A1A] text-white' : 'bg-gray-100 text-gray-500'}`}>
                 {label}
               </button>
             ))}
@@ -1113,7 +1113,7 @@ function FilterModal({ filters, setFilters, onClose, onReset }) {
           <div className="flex gap-2">
             {[['newest', 'Newest'], ['price_low', 'Price ↑'], ['price_high', 'Price ↓']].map(([val, label]) => (
               <button key={val} onClick={() => handle('sortBy', val)}
-                className={`flex-1 py-2.5 rounded-xl text-xs font-bold ${local.sortBy === val ? 'bg-teal-500 text-white' : 'bg-gray-100 text-gray-500'}`}>
+                className={`flex-1 py-2.5 rounded-xl text-xs font-bold ${local.sortBy === val ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-500'}`}>
                 {label}
               </button>
             ))}
@@ -1124,12 +1124,12 @@ function FilterModal({ filters, setFilters, onClose, onReset }) {
           <div className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3">
             <label className="text-sm font-semibold text-gray-700">Verified users only</label>
             <input type="checkbox" checked={local.verifiedOnly} onChange={e => handle('verifiedOnly', e.target.checked)}
-              className="w-5 h-5 accent-teal-500"/>
+              className="w-5 h-5 accent-orange-500"/>
           </div>
         </div>
 
         <button onClick={() => { setFilters(local); onClose() }}
-          className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700">
+          className="w-full bg-[#1A1A1A] text-white py-4 rounded-xl font-bold text-sm hover:bg-[#333333]">
           Apply Filters →
         </button>
       </div>
@@ -1253,13 +1253,13 @@ function App() {
   if (page === 'myprofile') return <ProfilePage userId={currentUser.id} currentUser={currentUser} onBack={() => setPage('feed')} onOpenRequests={() => setPage('requests')} onOpenSentRequests={() => setPage('sentrequests')} onLogout={handleLogout}  />
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#FFF8F3]">
       <div className="max-w-md mx-auto">
         <div className="bg-white sticky top-0 z-10 border-b border-gray-100">
           <div className="flex justify-between items-center px-5 py-4">
-            <div className="text-2xl font-black text-gray-900 tracking-tight">Yes<span className="text-teal-500">kro</span></div>
+            <div className="text-2xl font-black text-gray-900 tracking-tight">Yes<span className="text-orange-500">kro</span></div>
             <div className="flex items-center gap-2">
-              <button onClick={() => setPage('myprofile')} className="text-xs font-semibold text-gray-600 hover:text-teal-600">Hi, {currentUser.name.split(' ')[0]}</button>
+              <button onClick={() => setPage('myprofile')} className="text-xs font-semibold text-gray-600 hover:text-orange-600">Hi, {currentUser.name.split(' ')[0]}</button>
               <button onClick={() => setPage('requests')} className="relative p-1">
                 <span className="text-lg">🔔</span>
                  {inboxCount > 0 && (
@@ -1268,16 +1268,16 @@ function App() {
                 </span>
               )}
               </button>
-            <button onClick={() => setShowModal(true)} className="bg-gray-900 text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-gray-700">+ Post</button>
+            <button onClick={() => setShowModal(true)} className="bg-[#FF6B2B] text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-[#e55a1f]">+ Post</button>
             <button onClick={handleLogout} className="text-xs text-gray-400 hover:text-gray-600">logout</button>
             </div>
           </div>
           <div className="px-5 pb-3 flex gap-2">
-            <input type="text" placeholder="Search listings..." value={search} onChange={e => setSearch(e.target.value)} className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-teal-400"/>
-            <button onClick={() => setShowFilters(true)} className={`px-4 py-3 rounded-xl text-sm font-bold border ${Object.values(filters).some(v => v && v !== 'all' && v !== 'newest' && v !== false) ? 'bg-teal-500 text-white border-teal-500' : 'bg-gray-50 text-gray-600 border-gray-200'}`}>
+            <input type="text" placeholder="Search listings..." value={search} onChange={e => setSearch(e.target.value)} className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400"/>
+            <button onClick={() => setShowFilters(true)} className={`px-4 py-3 rounded-xl text-sm font-bold border ${Object.values(filters).some(v => v && v !== 'all' && v !== 'newest' && v !== false) ? 'bg-orange-500 text-white border-orange-500' : 'bg-gray-50 text-gray-600 border-gray-200'}`}>
               ⚙️
             </button>
-            </div>          <div className="flex gap-2 px-5 pb-4 overflow-x-auto">{['All',...CATEGORIES].map(cat => <button key={cat} onClick={() => setActivecat(cat)} className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap ${activecat===cat?'bg-gray-900 text-white':'bg-gray-100 text-gray-500'}`}>{cat}</button>)}</div>
+            </div>          <div className="flex gap-2 px-5 pb-4 overflow-x-auto">{['All',...CATEGORIES].map(cat => <button key={cat} onClick={() => setActivecat(cat)} className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap ${activecat===cat?'bg-[#1A1A1A] text-white':'bg-gray-100 text-gray-500'}`}>{cat}</button>)}</div>
         </div>
         <div className="px-5 pt-4">
           {successMsg && (
@@ -1288,7 +1288,7 @@ function App() {
           )}
           <div className="flex justify-between items-center mb-3">
          <div className="text-xs font-bold uppercase tracking-widest text-gray-400">{filtered.length} listings · {currentUser?.city || 'All'}</div>
-            <button onClick={() => setCityFilter(!cityFilter)} className={`text-xs font-semibold px-3 py-1 rounded-full ${cityFilter ? 'bg-teal-500 text-white' : 'bg-gray-100 text-gray-500'}`}>
+            <button onClick={() => setCityFilter(!cityFilter)} className={`text-xs font-semibold px-3 py-1 rounded-full ${cityFilter ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-500'}`}>
                 {cityFilter ? '📍 My City' : '🌍 All Cities'}
             </button>
           </div>

@@ -44,7 +44,7 @@ export default function SentRequests({ currentUser, onBack }) {
                     <div className="text-xs text-gray-500 mt-0.5">{req.listing?.category} · {req.listing?.area}</div>
                   </div>
                   <div className="flex items-center gap-3 bg-green-50 rounded-xl p-3">
-                    <div className="w-9 h-9 rounded-xl bg-teal-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                    <div className="w-9 h-9 rounded-xl bg-orange-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                       {req.listing?.user?.name?.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase()}
                     </div>
                     <div className="flex-1">
