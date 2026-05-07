@@ -161,8 +161,8 @@ function AuthPage({ onAuth, onLegal }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#FFFCFA] flex items-center justify-center sm:px-5">
-      <div className="bg-[#FFFCFA] sm:rounded-3xl sm:shadow-sm sm:border sm:border-orange-100 p-6 w-full">
+    <div className="min-h-screen bg-[#FFFCFA] flex items-start justify-center px-4 pt-6">
+      <div className="bg-[#FFFCFA] rounded-3xl shadow-sm border border-orange-100 p-6 w-full max-w-md">
         <div className="text-center mb-6">
           <div className="text-3xl font-black text-gray-900 tracking-tight mb-1">Yes<span className="text-orange-500">kro</span></div>
           {tab === 'login' && (
@@ -446,7 +446,7 @@ function ListingDetailPage({ listing, currentUser, onBack, sentRequestsMap, setS
   }
   const status = sentRequestsMap?.[listing.id]
   return (
-    <div className="min-h-screen bg-[#FFF8F3]">
+    <div className="min-h-screen bg-[##FFFCFA]">
       <div className="max-w-md mx-auto">
         <div className="bg-[#FFFCFA] border-b border-orange-100 px-5 py-4 flex items-center gap-3 sticky top-0 z-10">
           <button onClick={onBack} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-bold text-sm">←</button>
@@ -654,7 +654,7 @@ function RequestsInbox({ currentUser, onBack }) {
   const approved = requests.filter(r => r.status === 'approved')
 
   return (
-    <div className="min-h-screen bg-[#FFF8F3]">
+    <div className="min-h-screen bg-[#FFFCFA]">
       <div className="max-w-md mx-auto">
         <div className="bg-[#FFFCFA] border-b border-orange-100 px-5 py-4 flex items-center gap-3">
           <button onClick={onBack} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-bold text-sm">←</button>
@@ -934,10 +934,10 @@ function ProfilePage({ userId, currentUser, onBack, onOpenRequests, onOpenSentRe
   const isOwnProfile = currentUser?.id === userId
   const joinedDate = user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }) : ''
 
-  if (loading) return <div className="min-h-screen bg-[#FFF8F3] flex items-center justify-center"><div className="text-gray-400 text-sm">Loading...</div></div>
+  if (loading) return <div className="min-h-screen bg-[##FFFCFA] flex items-center justify-center"><div className="text-gray-400 text-sm">Loading...</div></div>
 
   return (
-    <div className="min-h-screen bg-[#FFF8F3]">
+    <div className="min-h-screen bg-[#FFFCFA]">
       <div className="max-w-md mx-auto">
         <div className="bg-[#FFFCFA] border-b border-orange-100 px-5 py-4 flex items-center gap-3">
           <button onClick={onBack} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-bold text-sm">←</button>
@@ -1354,7 +1354,7 @@ function App() {
   if (page === 'myprofile') return <ProfilePage userId={currentUser.id} currentUser={currentUser} onBack={() => setPage('feed')} onOpenRequests={() => setPage('requests')} onOpenSentRequests={() => setPage('sentrequests')} onLogout={handleLogout}  />
 
   return (
-    <div className="min-h-screen bg-[#FFF8F3]">
+    <div className="min-h-screen bg-[#FFFCFA]">
       <div className="max-w-md mx-auto">
         <div className="bg-[#FFFCFA] sticky top-0 z-10 border-b border-orange-100">
          <div className="flex justify-between items-center px-5 py-2">
