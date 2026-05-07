@@ -161,8 +161,8 @@ function AuthPage({ onAuth, onLegal }) {
   }
 
   return (
-      <div className="auth-wrapper min-h-screen bg-white flex items-center justify-center px-5">
-        <div className="auth-card bg-white rounded-3xl p-8 w-full max-w-md shadow-sm border border-orange-100">
+      <div className="min-h-screen bg-white flex items-center justify-center px-5" style={{alignItems: window.innerWidth < 480 ? 'stretch' : 'center', padding: window.innerWidth < 480 ? '0' : ''}}>
+        <div className="bg-white p-8 w-full max-w-md" style={{minHeight: window.innerWidth < 480 ? '100vh' : 'auto', borderRadius: window.innerWidth < 480 ? '0' : '24px', border: window.innerWidth < 480 ? 'none' : '1px solid #fed7aa', boxShadow: window.innerWidth < 480 ? 'none' : '0 1px 3px rgba(0,0,0,0.1)'}}>   
         <div className="text-center mb-6">
           <div className="text-3xl font-black text-gray-900 tracking-tight mb-1">Yes<span className="text-orange-500">kro</span></div>
           {tab === 'login' && (
