@@ -25,6 +25,8 @@ function AuthPage({ onAuth, onLegal }) {
   const [success, setSuccess] = useState(null)
   const [step, setStep] = useState('form')
   const [confirmationResult, setConfirmationResult] = useState(null)
+  const [profilePhoto, setProfilePhoto] = useState(null)
+  const [profilePhotoPreview, setProfilePhotoPreview] = useState(null)
 
   const clear = () => { setError(null); setSuccess(null) }
   const setupRecaptcha = () => {
@@ -107,10 +109,7 @@ function AuthPage({ onAuth, onLegal }) {
       setLoading(true); clear()
       await confirmationResult.confirm(otp)
       if (purpose === 'register') {
-        const res = await axios.post(`${API}/api/users/register`, { ...form, phone, password })
-        onAuth(res.data, keepLoggedIn)
-        mixpanel.track('User Registered', { area: res.data.area, city: res.data.city })
-        mixpanel.identify(String(res.data.id))
+        setStep('photo')
       } else if (purpose === 'reset') {
         setStep('newpassword')
       }
@@ -128,6 +127,26 @@ function AuthPage({ onAuth, onLegal }) {
       setStep('done')
       setSuccess('Password reset successfully!')
     } catch { setError('Reset failed. Try again.') }
+    finally { setLoading(false) }
+  }
+
+  const handleCompleteRegister = async () => {
+    try {
+      setLoading(true); clear()
+      let photoUrl = null
+      if (profilePhoto) {
+        const data = new FormData()
+        data.append('file', profilePhoto)
+        data.append('upload_preset', 'yeskro_listings')
+        const res = await fetch('https://api.cloudinary.com/v1_1/dbetftxjp/image/upload', { method: 'POST', body: data })
+        const json = await res.json()
+        photoUrl = json.secure_url
+      }
+      const res = await axios.post(`${API}/api/users/register`, { ...form, phone, password, photoUrl })
+      onAuth(res.data, keepLoggedIn)
+      mixpanel.track('User Registered', { area: res.data.area, city: res.data.city })
+      mixpanel.identify(String(res.data.id))
+    } catch { setError('Registration failed. Try again.') }
     finally { setLoading(false) }
   }
 
@@ -288,6 +307,39 @@ function AuthPage({ onAuth, onLegal }) {
             </button>
             <button onClick={() => handleSendOtp('register')} className="w-full mt-3 py-2 text-xs text-teal-600">Resend OTP</button>
             <button onClick={() => { setStep('form'); clear() }} className="w-full mt-1 py-2 text-xs text-gray-400">← Change details</button>
+          </>
+        )}
+        {tab === 'register' && step === 'photo' && (
+          <>
+            <div className="text-center mb-6">
+              <div className="text-xl font-black text-gray-900 mb-1">Add a profile photo</div>
+              <div className="text-xs text-gray-400">Help others recognize you. You can skip this.</div>
+            </div>
+            <div className="flex flex-col items-center mb-6">
+              <div className="relative mb-3">
+                {profilePhotoPreview
+                  ? <img src={profilePhotoPreview} className="w-24 h-24 rounded-full object-cover border-4 border-teal-100"/>
+                  : <div className="w-24 h-24 rounded-full bg-teal-100 flex items-center justify-center text-4xl">👤</div>
+                }
+                <label className="absolute bottom-0 right-0 bg-gray-900 rounded-full w-8 h-8 flex items-center justify-center cursor-pointer hover:bg-gray-700">
+                  <span className="text-white text-xs">📷</span>
+                  <input type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => {
+                    const file = e.target.files[0]
+                    if (!file) return
+                    if (file.size > 5 * 1024 * 1024) { setError('Photo must be under 5MB'); return }
+                    setProfilePhoto(file)
+                    setProfilePhotoPreview(URL.createObjectURL(file))
+                  }} className="hidden"/>
+                </label>
+              </div>
+            </div>
+            {error && <div className="bg-red-50 border border-red-200 rounded-xl p-3 mb-4 text-sm text-red-600">{error}</div>}
+            <button onClick={handleCompleteRegister} disabled={loading} className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-gray-700 disabled:opacity-50 mb-3">
+              {loading ? 'Creating account...' : 'Continue →'}
+            </button>
+            <button onClick={handleCompleteRegister} disabled={loading} className="w-full bg-gray-50 text-gray-500 py-3 rounded-xl font-semibold text-sm hover:bg-gray-100">
+              Skip for now
+            </button>
           </>
         )}
 
