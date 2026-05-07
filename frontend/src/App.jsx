@@ -433,11 +433,15 @@ function AuthPage({ onAuth, onLegal }) {
 function ListingDetailPage({ listing, currentUser, onBack, sentRequestsMap, setSentRequestsMap, onOpenSentRequests }) {
   const isOwn = currentUser?.id === listing.user?.id
   const initials = listing.user?.name ? listing.user.name.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase() : '??'
+  const [showMessageInput, setShowMessageInput] = useState(false)
+  const [connectMessage, setConnectMessage] = useState('')
   const handleRequestContact = async () => {
     if (!currentUser) return
     try {
-      await axios.post(`${API}/api/listings/${listing.id}/request-contact?requesterId=${currentUser.id}`)
+      const url = `${API}/api/listings/${listing.id}/request-contact?requesterId=${currentUser.id}${connectMessage.trim() ? `&message=${encodeURIComponent(connectMessage)}` : ''}`
+      await axios.post(url)
       setSentRequestsMap(prev => ({...prev, [listing.id]: 'pending'}))
+      setShowMessageInput(false)
     } catch { setSentRequestsMap(prev => ({...prev, [listing.id]: 'pending'})) }
   }
   const status = sentRequestsMap?.[listing.id]
@@ -482,7 +486,27 @@ function ListingDetailPage({ listing, currentUser, onBack, sentRequestsMap, setS
           </div>
           {!isOwn && (
             <div>
-              {!status && <button onClick={handleRequestContact} className="w-full py-4 rounded-2xl text-sm font-bold bg-[#1A1A1A] text-white hover:bg-[#333]">🤝 Connect with {listing.user?.name?.split(' ')[0]}</button>}
+              {!status && !showMessageInput && (
+  <button onClick={() => setShowMessageInput(true)} className="w-full py-4 rounded-2xl text-sm font-bold bg-[#1A1A1A] text-white hover:bg-[#333]">
+    🤝 Connect with {listing.user?.name?.split(' ')[0]}
+  </button>
+)}
+{!status && showMessageInput && (
+  <div className="bg-orange-50 border border-orange-200 rounded-2xl p-4">
+    <div className="text-sm font-bold text-gray-900 mb-2">Add a message (optional)</div>
+    <textarea
+      value={connectMessage}
+      onChange={e => setConnectMessage(e.target.value)}
+      placeholder={`Hi ${listing.user?.name?.split(' ')[0]}, I'm interested in your listing...`}
+      rows={3}
+      className="w-full bg-white border border-orange-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-orange-400 resize-none mb-3"
+    />
+    <div className="flex gap-2">
+      <button onClick={() => setShowMessageInput(false)} className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-gray-100 text-gray-500">Cancel</button>
+      <button onClick={handleRequestContact} className="flex-2 px-6 py-2.5 rounded-xl text-sm font-bold bg-[#1A1A1A] text-white hover:bg-[#333]">Send Request →</button>
+    </div>
+  </div>
+)}
               {status === 'pending' && <button disabled className="w-full py-4 rounded-2xl text-sm font-bold bg-orange-50 text-orange-500 border border-orange-200">⏳ Request Pending</button>}
               {status === 'approved' && <button onClick={onOpenSentRequests} className="w-full py-4 rounded-2xl text-sm font-bold bg-green-50 text-green-600 border border-green-200">📞 View Contact Number</button>}
               {status === 'rejected' && <button disabled className="w-full py-4 rounded-2xl text-sm font-bold bg-gray-50 text-gray-400 border border-gray-200">Request Declined</button>}

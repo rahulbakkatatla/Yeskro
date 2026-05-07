@@ -41,7 +41,7 @@ public class ContactRequestController {
     private EmailService emailService;
 
     @PostMapping("/listings/{listingId}/request-contact")
-    public ResponseEntity<?> requestContact(@PathVariable Long listingId, @RequestParam Long requesterId) {
+    public ResponseEntity<?> requestContact(@PathVariable Long listingId, @RequestParam Long requesterId, @RequestParam(required = false) String message) {
         if (contactRequestRepository.existsByRequesterIdAndListingId(requesterId, listingId)) {
             return ResponseEntity.badRequest().body("Already requested");
         }

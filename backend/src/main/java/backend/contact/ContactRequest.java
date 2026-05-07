@@ -31,6 +31,7 @@ public class ContactRequest {
     private Listing listing;
 
     private String status = "pending";
+    private String message;
 
     private LocalDateTime createdAt;
 
