@@ -7,4 +7,5 @@ public interface ContactRequestRepository extends JpaRepository<ContactRequest, 
     List<ContactRequest> findByListingUserId(Long userId);
     List<ContactRequest> findByRequesterId(Long requesterId);
     boolean existsByRequesterIdAndListingId(Long requesterId, Long listingId);
+    void deleteByListingId(Long listingId);
 }

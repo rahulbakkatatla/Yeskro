@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
+import backend.contact.ContactRequestRepository;
 
 @RestController
 @RequestMapping("/api/listings")
@@ -12,6 +13,9 @@ public class ListingController {
 
     @Autowired
     private ListingRepository listingRepository;
+    
+    @Autowired
+    private ContactRequestRepository contactRequestRepository;
 
     @GetMapping
     public List<Listing> getAllListings() {
@@ -54,6 +58,7 @@ public class ListingController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteListing(@PathVariable Long id) {
         if (!listingRepository.existsById(id)) return ResponseEntity.notFound().build();
+        contactRequestRepository.deleteByListingId(id);
         listingRepository.deleteById(id);
         return ResponseEntity.ok("Deleted");
     }
