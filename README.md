@@ -12,4 +12,3 @@ Yeskro is a verified hyperlocal marketplace for India. Post what you offer or ne
 
 **Built by** Rahul Yadav · NIT Warangal
 
-*Built in 10 days. Still building.*
